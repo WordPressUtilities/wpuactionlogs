@@ -1,2 +1,3 @@
-# wpuactionlogs
-Log some actions in the WordPress admin area
+# WPU Action Logs
+
+Log some actions in the WordPress admin area.

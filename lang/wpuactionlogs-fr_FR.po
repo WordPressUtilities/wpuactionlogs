@@ -1,0 +1,139 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WPU Action Logs\n"
+"POT-Creation-Date: 2022-08-28 22:40+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Generator: Poedit 3.1.1\n"
+"X-Poedit-SearchPath-0: ../.\n"
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:553
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:788
+msgid "New Post"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:555
+msgid "Back"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:582
+msgid "Submit"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:751
+#, php-format
+msgid "Items %s - %s"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:764
+#, php-format
+msgid "<strong>Filter :</strong> %s • <strong>Value :</strong> %s"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:765
+msgid "Reset"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:774
+msgid "Search"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:776
+msgid "Clear"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:833
+msgid "Show more details"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:839
+msgid "Edit"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:839
+msgid "View"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:846
+msgid "Delete"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:852
+msgid "Export all"
+msgstr ""
+
+#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:854
+msgid "Export filtered view"
+msgstr ""
+
+#: .././inc/WPUBaseAdminPage/WPUBaseAdminPage.php:180
+msgid "Help"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:135
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:551
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558 .././wpuactionlogs.php:61
+#: .././wpuactionlogs.php:63
+msgid "Settings"
+msgstr "Réglages"
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:164
+msgid "No"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:164
+msgid "Yes"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:300
+msgid "Settings saved."
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:346
+msgid "Upload New Media"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:497
+msgid "Language"
+msgstr ""
+
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:573
+msgid "Save"
+msgstr ""
+
+#: .././wpuactionlogs.php:90 .././wpuactionlogs.php:141
+msgid "User ID"
+msgstr "ID de l’utilisateur"
+
+#: .././wpuactionlogs.php:94 .././wpuactionlogs.php:142
+msgid "Action type"
+msgstr "Type d’action"
+
+#: .././wpuactionlogs.php:98 .././wpuactionlogs.php:143
+msgid "Action detail"
+msgstr "Détails de l’action"
+
+#: .././wpuactionlogs.php:118
+msgid "Actions"
+msgstr "Actions"
+
+#: .././wpuactionlogs.php:125
+#, php-format
+msgid "Enable logs for the “%s” action"
+msgstr "Activer les logs pour l’action « %s »"
+
+#: .././wpuactionlogs.php:140
+msgid "Date"
+msgstr ""
+
+#: .././wpuactionlogs.php:153
+msgid "Save Changes"
+msgstr "Sauvegarder"
