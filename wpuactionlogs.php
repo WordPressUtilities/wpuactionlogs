@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.1.0
+Version: 0.2.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.1.0';
+    private $plugin_version = '0.2.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -21,6 +21,9 @@ class WPUActionLogs {
     public function __construct() {
         add_filter('plugins_loaded', array(&$this,
             'load_translation'
+        ));
+        add_filter('plugins_loaded', array(&$this,
+            'load_update'
         ));
         add_filter('plugins_loaded', array(&$this,
             'load_admin_page'
@@ -75,6 +78,14 @@ class WPUActionLogs {
         include dirname(__FILE__) . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
         $this->adminpages = new \wpuactionlogs\WPUBaseAdminPage();
         $this->adminpages->init($pages_options, $admin_pages);
+    }
+
+    function load_update() {
+        include dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        $this->settings_update = new \wpuactionlogs\WPUBaseUpdate(
+            'WordPressUtilities',
+            'wpuactionlogs',
+            $this->plugin_version);
     }
 
     # CUSTOM TABLE
@@ -198,18 +209,23 @@ class WPUActionLogs {
             return;
         }
 
+        $post_type = get_post_type($post_id);
+        if ($post_type == 'nav_menu_item') {
+            return;
+        }
+
         $this->baseadmindatas->create_line(array(
             'user_id' => get_current_user_id(),
             'action_type' => 'save_post',
             'action_detail' => json_encode(array(
                 'post_id' => $post_id,
-                'post_type' => get_post_type($post_id),
+                'post_type' => $post_type,
                 'post_title' => get_the_title($post_id)
             ))
         ));
     }
 
-    function action__wp_update_nav_menu($menu_id, $menu_data = array()){
+    function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
 
         if (defined('WPUACTIONLOGS__WP_UPDATE_NAV_MENU__TRIGGERED')) {
             return;
@@ -225,12 +241,12 @@ class WPUActionLogs {
             'action_type' => 'wp_update_nav_menu',
             'action_detail' => json_encode(array(
                 'menu_id' => $menu_id,
-                'menu_data' => $menu_data,
+                'menu_data' => $menu_data
             ))
         ));
     }
 
-    function action__edit_term($term_id, $tt_id, $taxonomy){
+    function action__edit_term($term_id, $tt_id, $taxonomy) {
 
         if (defined('WPUACTIONLOGS__EDIT_TERM__TRIGGERED')) {
             return;
@@ -241,13 +257,17 @@ class WPUActionLogs {
             return;
         }
 
+        if ($taxonomy == 'nav_menu') {
+            return;
+        }
+
         $this->baseadmindatas->create_line(array(
             'user_id' => get_current_user_id(),
             'action_type' => 'edit_term',
             'action_detail' => json_encode(array(
                 'term_id' => $term_id,
                 'tt_id' => $tt_id,
-                'taxonomy' => $taxonomy,
+                'taxonomy' => $taxonomy
             ))
         ));
     }
