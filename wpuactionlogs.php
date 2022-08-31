@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.2.0
+Version: 0.3.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.2.0';
+    private $plugin_version = '0.3.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -110,6 +110,10 @@ class WPUActionLogs {
                     'public_name' => __('Action detail', 'wpuactionlogs'),
                     'type' => 'sql',
                     'sql' => 'TEXT'
+                ),
+                'action_interface' => array(
+                    'public_name' => __('Action interface', 'wpuactionlogs'),
+                    'type' => 'varchar'
                 )
             )
         ));
@@ -132,21 +136,21 @@ class WPUActionLogs {
             )
         );
 
-        $action_string = __('Enable logs for the “%s” action', 'wpuactionlogs');
+        $action_string = __('Enable logs for the “%s” actions', 'wpuactionlogs');
         $this->settings = array(
-            'action__save_post' => array(
-                'label' => 'save_post',
-                'label_check' => sprintf($action_string, 'save_post'),
+            'action__posts' => array(
+                'label' => __('Posts', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Posts', 'wpuactionlogs')),
                 'type' => 'checkbox'
             ),
             'action__wp_update_nav_menu' => array(
-                'label' => 'wp_update_nav_menu',
-                'label_check' => sprintf($action_string, 'wp_update_nav_menu'),
+                'label' => __('Menus', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Menus', 'wpuactionlogs')),
                 'type' => 'checkbox'
             ),
-            'action__edit_term' => array(
-                'label' => 'edit_term',
-                'label_check' => sprintf($action_string, 'edit_term'),
+            'action__terms' => array(
+                'label' => __('Terms', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Terms', 'wpuactionlogs')),
                 'type' => 'checkbox'
             )
         );
@@ -165,7 +169,8 @@ class WPUActionLogs {
                     'creation' => __('Date', 'wpuactionlogs'),
                     'user_id' => __('User ID', 'wpuactionlogs'),
                     'action_type' => __('Action type', 'wpuactionlogs'),
-                    'action_detail' => __('Action detail', 'wpuactionlogs')
+                    'action_detail' => __('Action detail', 'wpuactionlogs'),
+                    'action_interface' => __('Action interface', 'wpuactionlogs')
                 )
             )
         );
@@ -180,32 +185,69 @@ class WPUActionLogs {
     }
 
     /* ----------------------------------------------------------
+      Log
+    ---------------------------------------------------------- */
+
+    function log_line($args) {
+
+        if (!is_array($args)) {
+            $args = array(
+                'text' => $args
+            );
+        }
+
+        $this->baseadmindatas->create_line(array(
+            'user_id' => get_current_user_id(),
+            'action_interface' => php_sapi_name(),
+            'action_type' => current_action(),
+            'action_detail' => json_encode($args)
+        ));
+    }
+
+    /* ----------------------------------------------------------
       Actions
     ---------------------------------------------------------- */
 
     public function load_actions() {
-        add_action('save_post', array(&$this,
-            'action__save_post'
-        ), 99, 1);
+        $post_hooks = array(
+            'save_post',
+            'delete_post'
+        );
+        foreach ($post_hooks as $post_hook) {
+            add_action($post_hook, array(&$this,
+                'action__posts'
+            ), 99, 1);
+        }
+
+        /* Menus */
         add_action('wp_update_nav_menu', array(&$this,
             'action__wp_update_nav_menu'
         ), 99, 2);
-        add_action('edit_term', array(&$this,
-            'action__edit_term'
-        ), 99, 3);
+
+        /* Terms */
+        $term_hooks = array(
+            'edit_term',
+            'create_term',
+            'delete_term'
+        );
+        foreach ($term_hooks as $term_hook) {
+            add_action($term_hook, array(&$this,
+                'action__terms'
+            ), 99, 4);
+        }
     }
 
-    function action__save_post($post_id) {
+    function action__posts($post_id) {
         if (wp_is_post_revision($post_id)) {
             return;
         }
 
-        if (defined('WPUACTIONLOGS__ACTION__SAVE_POST__TRIGGERED')) {
+        if (defined('WPUACTIONLOGS__ACTION__POSTS__TRIGGERED')) {
             return;
         }
-        define('WPUACTIONLOGS__ACTION__SAVE_POST__TRIGGERED', 1);
+        define('WPUACTIONLOGS__ACTION__POSTS__TRIGGERED', 1);
 
-        if ($this->settings_obj->get_setting('action__save_post') != '1') {
+        if ($this->settings_obj->get_setting('action__posts') != '1') {
             return;
         }
 
@@ -214,46 +256,21 @@ class WPUActionLogs {
             return;
         }
 
-        $this->baseadmindatas->create_line(array(
-            'user_id' => get_current_user_id(),
-            'action_type' => 'save_post',
-            'action_detail' => json_encode(array(
-                'post_id' => $post_id,
-                'post_type' => $post_type,
-                'post_title' => get_the_title($post_id)
-            ))
-        ));
+        $args = array(
+            'post_id' => $post_id,
+            'post_type' => $post_type
+        );
+        $p = get_post($post_id);
+        if (!is_wp_error($p) && $p && $p->post_title) {
+            $args['post_title'] = $p->post_title;
+            $args['post_status'] = $p->post_status;
+        }
+
+        $this->log_line($args);
     }
 
-    function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
-
-        if (defined('WPUACTIONLOGS__WP_UPDATE_NAV_MENU__TRIGGERED')) {
-            return;
-        }
-        define('WPUACTIONLOGS__WP_UPDATE_NAV_MENU__TRIGGERED', 1);
-
-        if ($this->settings_obj->get_setting('action__wp_update_nav_menu') != '1') {
-            return;
-        }
-
-        $this->baseadmindatas->create_line(array(
-            'user_id' => get_current_user_id(),
-            'action_type' => 'wp_update_nav_menu',
-            'action_detail' => json_encode(array(
-                'menu_id' => $menu_id,
-                'menu_data' => $menu_data
-            ))
-        ));
-    }
-
-    function action__edit_term($term_id, $tt_id, $taxonomy) {
-
-        if (defined('WPUACTIONLOGS__EDIT_TERM__TRIGGERED')) {
-            return;
-        }
-        define('WPUACTIONLOGS__EDIT_TERM__TRIGGERED', 1);
-
-        if ($this->settings_obj->get_setting('action__edit_term') != '1') {
+    function action__terms($term_id, $tt_id, $taxonomy, $old_term = false) {
+        if ($this->settings_obj->get_setting('action__terms') != '1') {
             return;
         }
 
@@ -261,15 +278,19 @@ class WPUActionLogs {
             return;
         }
 
-        $this->baseadmindatas->create_line(array(
-            'user_id' => get_current_user_id(),
-            'action_type' => 'edit_term',
-            'action_detail' => json_encode(array(
-                'term_id' => $term_id,
-                'tt_id' => $tt_id,
-                'taxonomy' => $taxonomy
-            ))
-        ));
+        $args = array(
+            'term_id' => $term_id,
+            'tt_id' => $tt_id,
+            'taxonomy' => $taxonomy
+        );
+        $term = get_term($term_id);
+        if (!is_wp_error($term) && $term && $term->name) {
+            $args['name'] = $term->name;
+        }
+        if (is_object($old_term) && $old_term->name) {
+            $args['name'] = $old_term->name;
+        }
+        $this->log_line($args);
     }
 }
 

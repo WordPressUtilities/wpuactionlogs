@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2022-08-28 22:40+0200\n"
+"POT-Creation-Date: 2022-08-31 10:57+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -80,8 +80,8 @@ msgstr ""
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:135
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:551
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558 .././wpuactionlogs.php:61
-#: .././wpuactionlogs.php:63
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558 .././wpuactionlogs.php:64
+#: .././wpuactionlogs.php:66
 msgid "Settings"
 msgstr "Réglages"
 
@@ -109,31 +109,51 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: .././wpuactionlogs.php:90 .././wpuactionlogs.php:141
+#: .././wpuactionlogs.php:102 .././wpuactionlogs.php:170
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: .././wpuactionlogs.php:94 .././wpuactionlogs.php:142
+#: .././wpuactionlogs.php:106 .././wpuactionlogs.php:171
 msgid "Action type"
 msgstr "Type d’action"
 
-#: .././wpuactionlogs.php:98 .././wpuactionlogs.php:143
+#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:172
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: .././wpuactionlogs.php:118
+#: .././wpuactionlogs.php:115 .././wpuactionlogs.php:173
+msgid "Action interface"
+msgstr "Interface"
+
+#: .././wpuactionlogs.php:134
 msgid "Actions"
 msgstr "Actions"
 
-#: .././wpuactionlogs.php:125
+#: .././wpuactionlogs.php:139
 #, php-format
-msgid "Enable logs for the “%s” action"
-msgstr "Activer les logs pour l’action « %s »"
+msgid "Enable logs for the “%s” actions"
+msgstr "Activer les journaux pour les actions « %s »"
 
-#: .././wpuactionlogs.php:140
+#: .././wpuactionlogs.php:142 .././wpuactionlogs.php:143
+msgid "Posts"
+msgstr "Publications"
+
+#: .././wpuactionlogs.php:147 .././wpuactionlogs.php:148
+msgid "Menus"
+msgstr "Menus"
+
+#: .././wpuactionlogs.php:152 .././wpuactionlogs.php:153
+msgid "Terms"
+msgstr "Termes"
+
+#: .././wpuactionlogs.php:168
+msgid "ID"
+msgstr ""
+
+#: .././wpuactionlogs.php:169
 msgid "Date"
 msgstr ""
 
-#: .././wpuactionlogs.php:153
+#: .././wpuactionlogs.php:183
 msgid "Save Changes"
 msgstr "Sauvegarder"
