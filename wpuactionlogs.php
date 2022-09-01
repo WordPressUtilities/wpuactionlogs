@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.4.0
+Version: 0.4.1
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.4.0';
+    private $plugin_version = '0.4.1';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -266,9 +266,15 @@ class WPUActionLogs {
         }
 
         /* Plugins */
-        add_action('updated_option', array(&$this,
-            'action__options'
-        ), 99, 3);
+        $options_hooks = array(
+            'add_option',
+            'updated_option'
+        );
+        foreach ($options_hooks as $option_hook) {
+            add_action($option_hook, array(&$this,
+                'action__options'
+            ), 99, 1);
+        }
     }
 
     function action__posts($post_id) {
@@ -327,7 +333,7 @@ class WPUActionLogs {
         $this->log_line($args);
     }
 
-    function action__options($option_name, $old_value, $value) {
+    function action__options($option_name) {
         if ($this->settings_obj->get_setting('action__options') != '1') {
             return;
         }
@@ -336,7 +342,20 @@ class WPUActionLogs {
             return;
         }
 
-        if ($option_name == 'action_scheduler_lock_async-request-runner') {
+        $excluded_options = array(
+            'cron',
+            'action_scheduler_lock_async-request-runner'
+        );
+
+        if (in_array($option_name, $excluded_options)) {
+            return;
+        }
+
+        if (substr($option_name, 0, 15) == '_site_transient') {
+            return;
+        }
+
+        if (substr($option_name, 0, 10) == '_transient') {
             return;
         }
 
