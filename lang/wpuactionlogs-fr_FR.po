@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2022-08-31 10:57+0200\n"
+"POT-Creation-Date: 2022-09-01 19:00+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -109,19 +109,19 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: .././wpuactionlogs.php:102 .././wpuactionlogs.php:170
+#: .././wpuactionlogs.php:102
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: .././wpuactionlogs.php:106 .././wpuactionlogs.php:171
+#: .././wpuactionlogs.php:106 .././wpuactionlogs.php:178
 msgid "Action type"
 msgstr "Type d’action"
 
-#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:172
+#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:179
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: .././wpuactionlogs.php:115 .././wpuactionlogs.php:173
+#: .././wpuactionlogs.php:115 .././wpuactionlogs.php:180
 msgid "Action interface"
 msgstr "Interface"
 
@@ -146,14 +146,25 @@ msgstr "Menus"
 msgid "Terms"
 msgstr "Termes"
 
-#: .././wpuactionlogs.php:168
+#: .././wpuactionlogs.php:157 .././wpuactionlogs.php:158
+msgid "Options"
+msgstr "Options"
+
+#: .././wpuactionlogs.php:175
 msgid "ID"
 msgstr ""
 
-#: .././wpuactionlogs.php:169
+#: .././wpuactionlogs.php:176
 msgid "Date"
 msgstr ""
 
-#: .././wpuactionlogs.php:183
+#: .././wpuactionlogs.php:177
+msgid "Account"
+msgstr "Compte"
+
+#: .././wpuactionlogs.php:201
 msgid "Save Changes"
 msgstr "Sauvegarder"
+
+#~ msgid "User"
+#~ msgstr "Utilisateur"

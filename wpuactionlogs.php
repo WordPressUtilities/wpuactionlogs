@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.3.0
+Version: 0.4.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.3.0';
+    private $plugin_version = '0.4.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -152,6 +152,11 @@ class WPUActionLogs {
                 'label' => __('Terms', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Terms', 'wpuactionlogs')),
                 'type' => 'checkbox'
+            ),
+            'action__options' => array(
+                'label' => __('Options', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Options', 'wpuactionlogs')),
+                'type' => 'checkbox'
             )
         );
         include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
@@ -159,6 +164,8 @@ class WPUActionLogs {
     }
 
     public function page_content__main() {
+        add_filter('wpubaseadmindatas_cellcontent', array(&$this, 'wpubaseadmindatas_cellcontent'), 10, 3);
+
         $array_values = false; // ($array_values are automatically retrieved if not a valid array)
         echo $this->baseadmindatas->get_admin_table(
             $array_values,
@@ -167,13 +174,35 @@ class WPUActionLogs {
                 'columns' => array(
                     'id' => __('ID', 'wpuactionlogs'),
                     'creation' => __('Date', 'wpuactionlogs'),
-                    'user_id' => __('User ID', 'wpuactionlogs'),
+                    'user_id' => __('Account', 'wpuactionlogs'),
                     'action_type' => __('Action type', 'wpuactionlogs'),
                     'action_detail' => __('Action detail', 'wpuactionlogs'),
                     'action_interface' => __('Action interface', 'wpuactionlogs')
                 )
             )
         );
+    }
+
+    function wpubaseadmindatas_cellcontent($cellcontent, $cell_id, $settings) {
+        if ($cell_id == 'user_id' && is_numeric($cellcontent)) {
+            $user = get_user_by('id', $cellcontent);
+            if ($user) {
+                $cellcontent = '<img style="vertical-align:middle;margin-right:0.3em" src="' . esc_url(get_avatar_url($user->ID, array('size' => 16))) . '" />';
+                $cellcontent .= '<strong style="vertical-align:middle">' . esc_html($user->user_login) . '</strong>';
+            }
+        }
+        if ($cell_id == 'action_detail') {
+            $data = json_decode($cellcontent, 1);
+            if (is_array($data)) {
+                $cellcontent = '';
+                $cellcontent .= '<ul style="margin:0">';
+                foreach ($data as $key => $var) {
+                    $cellcontent .= '<li style="margin:0"><strong>' . $key . ' : </strong><span>' . $var . '</span></li>';
+                }
+                $cellcontent .= '</ul>';
+            }
+        }
+        return $cellcontent;
     }
 
     public function page_content__subpage() {
@@ -235,6 +264,11 @@ class WPUActionLogs {
                 'action__terms'
             ), 99, 4);
         }
+
+        /* Plugins */
+        add_action('updated_option', array(&$this,
+            'action__options'
+        ), 99, 3);
     }
 
     function action__posts($post_id) {
@@ -291,6 +325,24 @@ class WPUActionLogs {
             $args['name'] = $old_term->name;
         }
         $this->log_line($args);
+    }
+
+    function action__options($option_name, $old_value, $value) {
+        if ($this->settings_obj->get_setting('action__options') != '1') {
+            return;
+        }
+
+        if (!is_admin()) {
+            return;
+        }
+
+        if ($option_name == 'action_scheduler_lock_async-request-runner') {
+            return;
+        }
+
+        $this->log_line(array(
+            'option_name' => $option_name
+        ));
     }
 }
 
