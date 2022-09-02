@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.4.1
+Version: 0.4.2
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.4.1';
+    private $plugin_version = '0.4.2';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -55,6 +55,7 @@ class WPUActionLogs {
                 'icon_url' => 'dashicons-admin-generic',
                 'menu_name' => $this->plugin_settings['name'],
                 'name' => $this->plugin_settings['name'],
+                'has_form' => false,
                 'function_content' => array(&$this,
                     'page_content__main'
                 )
@@ -96,6 +97,7 @@ class WPUActionLogs {
             'handle_database' => false,
             'can_edit' => true,
             'plugin_id' => $this->plugin_settings['id'],
+            'plugin_pageid' => $this->plugin_settings['id'] . '-main',
             'table_name' => 'wpuactionlogs',
             'table_fields' => array(
                 'user_id' => array(
@@ -342,21 +344,26 @@ class WPUActionLogs {
             return;
         }
 
-        $excluded_options = array(
+        $excluded_options = apply_filters('wpuactionlogs__action__options__excluded_options', array(
             'cron',
             'action_scheduler_lock_async-request-runner'
-        );
+        ));
 
         if (in_array($option_name, $excluded_options)) {
             return;
         }
 
-        if (substr($option_name, 0, 15) == '_site_transient') {
-            return;
-        }
+        $excluded_options_start = apply_filters('wpuactionlogs__action__options__excluded_options_start', array(
+            'rocket_partial_preload_batch_',
+            '_site_transient',
+            '_transient'
+        ));
 
-        if (substr($option_name, 0, 10) == '_transient') {
-            return;
+        foreach ($excluded_options_start as $start) {
+            $start_length = strlen($start);
+            if (substr($option_name, 0, $start_length) == $start) {
+                return;
+            }
         }
 
         $this->log_line(array(
