@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.4.2
+Version: 0.5.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,12 +11,14 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.4.2';
+    private $plugin_version = '0.5.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
     );
     private $settings_obj;
+    private $last_post_id;
+    private $admin_page_id = 'wpuactionlogs-main';
 
     public function __construct() {
         add_filter('plugins_loaded', array(&$this,
@@ -97,7 +99,7 @@ class WPUActionLogs {
             'handle_database' => false,
             'can_edit' => true,
             'plugin_id' => $this->plugin_settings['id'],
-            'plugin_pageid' => $this->plugin_settings['id'] . '-main',
+            'plugin_pageid' => $this->admin_page_id,
             'table_name' => 'wpuactionlogs',
             'table_fields' => array(
                 'user_id' => array(
@@ -186,12 +188,22 @@ class WPUActionLogs {
     }
 
     function wpubaseadmindatas_cellcontent($cellcontent, $cell_id, $settings) {
+        $admin_url = admin_url('admin.php?page=' . $this->admin_page_id);
+        $filter_url = $admin_url . '&' . http_build_query(array(
+            'filter_key' => $cell_id,
+            'filter_value' => $cellcontent
+        ));
         if ($cell_id == 'user_id' && is_numeric($cellcontent)) {
-            $user = get_user_by('id', $cellcontent);
+            $user_id = $cellcontent;
+            $user = get_user_by('id', $user_id);
             if ($user) {
+                $login = '<a href="' . esc_url($filter_url) . '">' . esc_html($user->user_login) . '</a>';
                 $cellcontent = '<img style="vertical-align:middle;margin-right:0.3em" src="' . esc_url(get_avatar_url($user->ID, array('size' => 16))) . '" />';
-                $cellcontent .= '<strong style="vertical-align:middle">' . esc_html($user->user_login) . '</strong>';
+                $cellcontent .= '<strong style="vertical-align:middle">' . $login . '</strong>';
             }
+        }
+        if ($cell_id == 'action_type') {
+            $cellcontent = '<a href="' . esc_url($filter_url) . '">' . esc_html($cellcontent) . '</a>';
         }
         if ($cell_id == 'action_detail') {
             $data = json_decode($cellcontent, 1);
@@ -284,10 +296,11 @@ class WPUActionLogs {
             return;
         }
 
-        if (defined('WPUACTIONLOGS__ACTION__POSTS__TRIGGERED')) {
+        /* Trigger only once per call per post */
+        if ($this->last_post_id == $post_id) {
             return;
         }
-        define('WPUACTIONLOGS__ACTION__POSTS__TRIGGERED', 1);
+        $this->last_post_id = $post_id;
 
         if ($this->settings_obj->get_setting('action__posts') != '1') {
             return;
