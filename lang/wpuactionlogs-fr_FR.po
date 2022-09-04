@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2022-09-01 19:00+0200\n"
+"POT-Creation-Date: 2022-09-04 20:57+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -80,8 +80,8 @@ msgstr ""
 
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:135
 #: .././inc/WPUBaseSettings/WPUBaseSettings.php:551
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558 .././wpuactionlogs.php:64
-#: .././wpuactionlogs.php:66
+#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558 .././wpuactionlogs.php:67
+#: .././wpuactionlogs.php:69
 msgid "Settings"
 msgstr "Réglages"
 
@@ -109,60 +109,64 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: .././wpuactionlogs.php:102
+#: .././wpuactionlogs.php:106
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: .././wpuactionlogs.php:106 .././wpuactionlogs.php:178
+#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:187
 msgid "Action type"
 msgstr "Type d’action"
 
-#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:179
+#: .././wpuactionlogs.php:114 .././wpuactionlogs.php:188
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: .././wpuactionlogs.php:115 .././wpuactionlogs.php:180
+#: .././wpuactionlogs.php:119 .././wpuactionlogs.php:189
 msgid "Action interface"
 msgstr "Interface"
 
-#: .././wpuactionlogs.php:134
+#: .././wpuactionlogs.php:138
 msgid "Actions"
 msgstr "Actions"
 
-#: .././wpuactionlogs.php:139
+#: .././wpuactionlogs.php:143
 #, php-format
-msgid "Enable logs for the “%s” actions"
-msgstr "Activer les journaux pour les actions « %s »"
+msgid "Enable logs for “%s”"
+msgstr "Activer les journaux pour les « %s »"
 
-#: .././wpuactionlogs.php:142 .././wpuactionlogs.php:143
+#: .././wpuactionlogs.php:146 .././wpuactionlogs.php:147
 msgid "Posts"
 msgstr "Publications"
 
-#: .././wpuactionlogs.php:147 .././wpuactionlogs.php:148
+#: .././wpuactionlogs.php:151 .././wpuactionlogs.php:152
 msgid "Menus"
 msgstr "Menus"
 
-#: .././wpuactionlogs.php:152 .././wpuactionlogs.php:153
+#: .././wpuactionlogs.php:156 .././wpuactionlogs.php:157
 msgid "Terms"
 msgstr "Termes"
 
-#: .././wpuactionlogs.php:157 .././wpuactionlogs.php:158
+#: .././wpuactionlogs.php:161 .././wpuactionlogs.php:162
 msgid "Options"
 msgstr "Options"
 
-#: .././wpuactionlogs.php:175
+#: .././wpuactionlogs.php:166 .././wpuactionlogs.php:167
+msgid "Emails"
+msgstr "Emails"
+
+#: .././wpuactionlogs.php:184
 msgid "ID"
 msgstr ""
 
-#: .././wpuactionlogs.php:176
+#: .././wpuactionlogs.php:185
 msgid "Date"
 msgstr ""
 
-#: .././wpuactionlogs.php:177
+#: .././wpuactionlogs.php:186
 msgid "Account"
 msgstr "Compte"
 
-#: .././wpuactionlogs.php:201
+#: .././wpuactionlogs.php:231
 msgid "Save Changes"
 msgstr "Sauvegarder"
 

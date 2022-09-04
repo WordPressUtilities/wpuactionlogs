@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.5.0
+Version: 0.6.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.5.0';
+    private $plugin_version = '0.6.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -140,7 +140,7 @@ class WPUActionLogs {
             )
         );
 
-        $action_string = __('Enable logs for the “%s” actions', 'wpuactionlogs');
+        $action_string = __('Enable logs for “%s”', 'wpuactionlogs');
         $this->settings = array(
             'action__posts' => array(
                 'label' => __('Posts', 'wpuactionlogs'),
@@ -160,6 +160,11 @@ class WPUActionLogs {
             'action__options' => array(
                 'label' => __('Options', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Options', 'wpuactionlogs')),
+                'type' => 'checkbox'
+            ),
+            'action__mails' => array(
+                'label' => __('Emails', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Emails', 'wpuactionlogs')),
                 'type' => 'checkbox'
             )
         );
@@ -208,6 +213,9 @@ class WPUActionLogs {
         if ($cell_id == 'action_detail') {
             $data = json_decode($cellcontent, 1);
             if (is_array($data)) {
+                if (isset($data['to'], $data['subject'], $data['message'])) {
+                    $data['message'] = $this->text_truncate($data['message'], 100);
+                }
                 $cellcontent = '';
                 $cellcontent .= '<ul style="margin:0">';
                 foreach ($data as $key => $var) {
@@ -289,6 +297,11 @@ class WPUActionLogs {
                 'action__options'
             ), 99, 1);
         }
+
+        /* Emails */
+        add_filter('wp_mail', array(&$this,
+            'action__mails'
+        ), 9999, 1);
     }
 
     function action__posts($post_id) {
@@ -383,6 +396,51 @@ class WPUActionLogs {
             'option_name' => $option_name
         ));
     }
+
+    function action__mails($args) {
+        if ($this->settings_obj->get_setting('action__mails') == '1') {
+            $this->log_line(array(
+                'to' => $args['to'],
+                'subject' => $args['subject'],
+                'message' => strip_tags($args['message'])
+            ));
+        }
+        return $args;
+    }
+
+    /* ----------------------------------------------------------
+      Helpers
+    ---------------------------------------------------------- */
+
+    function text_truncate($string, $length = 150, $more = '...') {
+        $_new_string = '';
+        $string = strip_tags($string);
+        $_maxlen = $length - strlen($more);
+        $_words = explode(' ', $string);
+
+        /* Add word to word */
+        foreach ($_words as $_word) {
+            if (strlen($_word) + strlen($_new_string) >= $_maxlen) {
+                break;
+            }
+
+            /* Separate by spaces */
+            if (!empty($_new_string)) {
+                $_new_string .= ' ';
+            }
+            $_new_string .= $_word;
+        }
+
+        /* If new string is shorter than original */
+        if (strlen($_new_string) < strlen($string)) {
+
+            /* Add the after text */
+            $_new_string .= $more;
+        }
+
+        return $_new_string;
+    }
+
 }
 
 $WPUActionLogs = new WPUActionLogs();
