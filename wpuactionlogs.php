@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.6.0
+Version: 0.6.1
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.6.0';
+    private $plugin_version = '0.6.1';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -406,6 +406,13 @@ class WPUActionLogs {
             ));
         }
         return $args;
+    }
+
+
+    function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
+        if ($this->settings_obj->get_setting('action__wp_update_nav_menu') == '1' && $menu_data) {
+            $this->log_line($menu_data);
+        }
     }
 
     /* ----------------------------------------------------------
