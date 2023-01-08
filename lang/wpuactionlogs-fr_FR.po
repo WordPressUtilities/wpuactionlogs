@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2022-09-04 20:57+0200\n"
+"POT-Creation-Date: 2023-01-08 21:40+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_e\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.2.2\n"
 "X-Poedit-SearchPath-0: ../.\n"
 
 #: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:553
@@ -113,15 +113,15 @@ msgstr ""
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:187
+#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:201
 msgid "Action type"
 msgstr "Type d’action"
 
-#: .././wpuactionlogs.php:114 .././wpuactionlogs.php:188
+#: .././wpuactionlogs.php:114 .././wpuactionlogs.php:202
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: .././wpuactionlogs.php:119 .././wpuactionlogs.php:189
+#: .././wpuactionlogs.php:119 .././wpuactionlogs.php:203
 msgid "Action interface"
 msgstr "Interface"
 
@@ -155,18 +155,26 @@ msgid "Emails"
 msgstr "Emails"
 
 #: .././wpuactionlogs.php:184
+msgid "Select an user: "
+msgstr "Sélectionnez un utilisateur : "
+
+#: .././wpuactionlogs.php:185
+msgid "All"
+msgstr "Tous"
+
+#: .././wpuactionlogs.php:198
 msgid "ID"
 msgstr ""
 
-#: .././wpuactionlogs.php:185
+#: .././wpuactionlogs.php:199
 msgid "Date"
 msgstr ""
 
-#: .././wpuactionlogs.php:186
+#: .././wpuactionlogs.php:200
 msgid "Account"
 msgstr "Compte"
 
-#: .././wpuactionlogs.php:231
+#: .././wpuactionlogs.php:248
 msgid "Save Changes"
 msgstr "Sauvegarder"
 

@@ -3,7 +3,7 @@
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.6.1
+Version: 0.7.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
@@ -11,7 +11,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.6.1';
+    private $plugin_version = '0.7.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -174,6 +174,20 @@ class WPUActionLogs {
 
     public function page_content__main() {
         add_filter('wpubaseadmindatas_cellcontent', array(&$this, 'wpubaseadmindatas_cellcontent'), 10, 3);
+
+        /* Filter by user */
+        $current_user = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'user_id' && is_numeric($_GET['filter_value']) ? $_GET['filter_value'] : '';
+        $table = $this->plugin_settings['id'];
+        global $wpdb;
+        $users = $wpdb->get_col("SELECT DISTINCT user_id FROM {$wpdb->prefix}{$table} WHERE user_id != ''");
+        if ($users) {
+            echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+this.value:this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
+            echo '<option ' . ($current_user == '' ? 'selected' : '') . ' value="">' . __('All', 'wpuactionlogs') . '</option>';
+            foreach ($users as $usr_id) {
+                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . get_the_author_meta('nicename', $usr_id) . '</option>';
+            }
+            echo '</select></p>';
+        }
 
         $array_values = false; // ($array_values are automatically retrieved if not a valid array)
         echo $this->baseadmindatas->get_admin_table(
@@ -407,7 +421,6 @@ class WPUActionLogs {
         }
         return $args;
     }
-
 
     function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
         if ($this->settings_obj->get_setting('action__wp_update_nav_menu') == '1' && $menu_data) {
