@@ -2,16 +2,27 @@
 /*
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
+Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.7.0
+Version: 0.7.1
 Author: Darklg
 Author URI: https://darklg.me/
+Text Domain: wpuactionlogs
+Domain Path: /lang
+Requires at least: 6.0
+Requires PHP: 8.0
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
-    private $plugin_version = '0.7.0';
+    public $plugin_description;
+    public $adminpages;
+    public $settings_update;
+    public $baseadmindatas;
+    public $settings_details;
+    public $settings;
+    private $plugin_version = '0.7.1';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -47,7 +58,11 @@ class WPUActionLogs {
 
     # TRANSLATION
     function load_translation() {
-        load_plugin_textdomain('wpuactionlogs', false, dirname(plugin_basename(__FILE__)) . '/lang/');
+        $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
+        if (!load_plugin_textdomain('wpuactionlogs', false, $lang_dir)) {
+            load_muplugin_textdomain('wpuactionlogs', $lang_dir);
+        }
+        $this->plugin_description = __('WPU Action Logs is a wonderful plugin.', 'wpuactionlogs');
     }
 
     # ADMIN PAGES
@@ -233,7 +248,11 @@ class WPUActionLogs {
                 $cellcontent = '';
                 $cellcontent .= '<ul style="margin:0">';
                 foreach ($data as $key => $var) {
-                    $cellcontent .= '<li style="margin:0"><strong>' . $key . ' : </strong><span>' . $var . '</span></li>';
+                    $var_display = $var;
+                    if (is_array($var_display) && isset($var_display[0])) {
+                        $var_display = implode(', ', $var_display);
+                    }
+                    $cellcontent .= '<li style="margin:0"><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
                 }
                 $cellcontent .= '</ul>';
             }
