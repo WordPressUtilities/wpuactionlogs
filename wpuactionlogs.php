@@ -4,7 +4,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.7.1
+Version: 0.8.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -22,7 +22,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.7.1';
+    private $plugin_version = '0.8.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -435,7 +435,7 @@ class WPUActionLogs {
             $this->log_line(array(
                 'to' => $args['to'],
                 'subject' => $args['subject'],
-                'message' => strip_tags($args['message'])
+                'message' => $this->strip_tags_content($args['message'])
             ));
         }
         return $args;
@@ -450,6 +450,28 @@ class WPUActionLogs {
     /* ----------------------------------------------------------
       Helpers
     ---------------------------------------------------------- */
+
+    function strip_tags_content($string) {
+        // Remove script and style contents
+        $string = preg_replace(array(
+            '#<script[^>]*?>(.*)</script>#siU',
+            '#<style[^>]*?>(.*)</style>#siU'
+        ), '', $string);
+
+        // Remove HTML tags
+        $string = str_replace('>', '> ', $string);
+        $string = strip_tags($string);
+        $string = preg_replace('/\s+/', ' ', $string);
+
+        // Trim each line
+        $lines = preg_split("/(\r\n|\n|\r)/", $string);
+        $lines = array_map('trim', $lines);
+
+        // Remove empty lines
+        $lines = array_filter($lines, 'strlen');
+
+        return implode("\n", $lines);
+    }
 
     function text_truncate($string, $length = 150, $more = '...') {
         $_new_string = '';
