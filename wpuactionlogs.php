@@ -1,10 +1,11 @@
 <?php
+defined('ABSPATH') || die;
 /*
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: WPU Action Logs is a wonderful plugin.
-Version: 0.8.0
+Version: 0.9.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -22,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.8.0';
+    private $plugin_version = '0.9.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -93,13 +94,13 @@ class WPUActionLogs {
             'level' => 'manage_options',
             'basename' => plugin_basename(__FILE__)
         );
-        include dirname(__FILE__) . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
+        include __DIR__ . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
         $this->adminpages = new \wpuactionlogs\WPUBaseAdminPage();
         $this->adminpages->init($pages_options, $admin_pages);
     }
 
     function load_update() {
-        include dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        include __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpuactionlogs\WPUBaseUpdate(
             'WordPressUtilities',
             'wpuactionlogs',
@@ -108,7 +109,7 @@ class WPUActionLogs {
 
     # CUSTOM TABLE
     public function load_custom_table() {
-        include dirname(__FILE__) . '/inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php';
+        include __DIR__ . '/inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php';
         $this->baseadmindatas = new \wpuactionlogs\WPUBaseAdminDatas();
         $this->baseadmindatas->init(array(
             'handle_database' => false,
@@ -183,7 +184,7 @@ class WPUActionLogs {
                 'type' => 'checkbox'
             )
         );
-        include dirname(__FILE__) . '/inc/WPUBaseSettings/WPUBaseSettings.php';
+        include __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wpuactionlogs\WPUBaseSettings($this->settings_details, $this->settings);
     }
 
@@ -403,6 +404,7 @@ class WPUActionLogs {
             return;
         }
 
+        /* Excluded names */
         $excluded_options = apply_filters('wpuactionlogs__action__options__excluded_options', array(
             'cron',
             'action_scheduler_lock_async-request-runner'
@@ -412,6 +414,7 @@ class WPUActionLogs {
             return;
         }
 
+        /* Excluded start */
         $excluded_options_start = apply_filters('wpuactionlogs__action__options__excluded_options_start', array(
             'rocket_partial_preload_batch_',
             '_site_transient',
@@ -425,6 +428,19 @@ class WPUActionLogs {
             }
         }
 
+        /* Excluded end */
+        $excluded_options_end = apply_filters('wpuactionlogs__action__options__excluded_options_end', array(
+            '__cron_hook_lastexec',
+        ));
+
+        foreach ($excluded_options_end as $end) {
+            $end_length = strlen($end);
+            if (substr($option_name, 0 - $end_length) == $end) {
+                return;
+            }
+        }
+
+        /* Log */
         $this->log_line(array(
             'option_name' => $option_name
         ));
