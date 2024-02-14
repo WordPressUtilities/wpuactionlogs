@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2023-01-08 21:40+0100\n"
+"POT-Creation-Date: 2024-02-14 23:36+0700\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -10,173 +10,89 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-Basepath: .\n"
+"X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e\n"
-"X-Generator: Poedit 3.2.2\n"
-"X-Poedit-SearchPath-0: ../.\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: inc\n"
 
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:553
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:788
-msgid "New Post"
-msgstr ""
+#: wpuactionlogs.php:66
+msgid "Useful logs about what’s happening on your website admin."
+msgstr "Des logs utiles sur ce qui se passe dans l’administration de votre site Web."
 
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:555
-msgid "Back"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:582
-msgid "Submit"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:751
-#, php-format
-msgid "Items %s - %s"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:764
-#, php-format
-msgid "<strong>Filter :</strong> %s • <strong>Value :</strong> %s"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:765
-msgid "Reset"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:774
-msgid "Search"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:776
-msgid "Clear"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:833
-msgid "Show more details"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:839
-msgid "Edit"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:839
-msgid "View"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:846
-msgid "Delete"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:852
-msgid "Export all"
-msgstr ""
-
-#: .././inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:854
-msgid "Export filtered view"
-msgstr ""
-
-#: .././inc/WPUBaseAdminPage/WPUBaseAdminPage.php:180
-msgid "Help"
-msgstr ""
-
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:135
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:551
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:558 .././wpuactionlogs.php:67
-#: .././wpuactionlogs.php:69
+#: wpuactionlogs.php:83 wpuactionlogs.php:85
 msgid "Settings"
 msgstr "Réglages"
 
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:164
-msgid "No"
-msgstr ""
-
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:164
-msgid "Yes"
-msgstr ""
-
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:300
-msgid "Settings saved."
-msgstr ""
-
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:346
-msgid "Upload New Media"
-msgstr ""
-
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:497
-msgid "Language"
-msgstr ""
-
-#: .././inc/WPUBaseSettings/WPUBaseSettings.php:573
-msgid "Save"
-msgstr ""
-
-#: .././wpuactionlogs.php:106
+#: wpuactionlogs.php:122
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: .././wpuactionlogs.php:110 .././wpuactionlogs.php:201
+#: wpuactionlogs.php:126 wpuactionlogs.php:222
 msgid "Action type"
 msgstr "Type d’action"
 
-#: .././wpuactionlogs.php:114 .././wpuactionlogs.php:202
+#: wpuactionlogs.php:130 wpuactionlogs.php:223
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: .././wpuactionlogs.php:119 .././wpuactionlogs.php:203
+#: wpuactionlogs.php:135 wpuactionlogs.php:224
 msgid "Action interface"
 msgstr "Interface"
 
-#: .././wpuactionlogs.php:138
+#: wpuactionlogs.php:154
 msgid "Actions"
 msgstr "Actions"
 
-#: .././wpuactionlogs.php:143
+#: wpuactionlogs.php:159
 #, php-format
 msgid "Enable logs for “%s”"
 msgstr "Activer les journaux pour les « %s »"
 
-#: .././wpuactionlogs.php:146 .././wpuactionlogs.php:147
+#: wpuactionlogs.php:162 wpuactionlogs.php:163
 msgid "Posts"
 msgstr "Publications"
 
-#: .././wpuactionlogs.php:151 .././wpuactionlogs.php:152
+#: wpuactionlogs.php:167 wpuactionlogs.php:168
 msgid "Menus"
 msgstr "Menus"
 
-#: .././wpuactionlogs.php:156 .././wpuactionlogs.php:157
+#: wpuactionlogs.php:172 wpuactionlogs.php:173
 msgid "Terms"
 msgstr "Termes"
 
-#: .././wpuactionlogs.php:161 .././wpuactionlogs.php:162
+#: wpuactionlogs.php:177 wpuactionlogs.php:178
 msgid "Options"
 msgstr "Options"
 
-#: .././wpuactionlogs.php:166 .././wpuactionlogs.php:167
+#: wpuactionlogs.php:182 wpuactionlogs.php:183
 msgid "Emails"
 msgstr "Emails"
 
-#: .././wpuactionlogs.php:184
+#: wpuactionlogs.php:187 wpuactionlogs.php:188
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: wpuactionlogs.php:205
 msgid "Select an user: "
 msgstr "Sélectionnez un utilisateur : "
 
-#: .././wpuactionlogs.php:185
+#: wpuactionlogs.php:206
 msgid "All"
 msgstr "Tous"
 
-#: .././wpuactionlogs.php:198
+#: wpuactionlogs.php:219
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
-#: .././wpuactionlogs.php:199
+#: wpuactionlogs.php:220
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
-#: .././wpuactionlogs.php:200
+#: wpuactionlogs.php:221
 msgid "Account"
 msgstr "Compte"
 
-#: .././wpuactionlogs.php:248
+#: wpuactionlogs.php:273
 msgid "Save Changes"
 msgstr "Sauvegarder"
-
-#~ msgid "User"
-#~ msgstr "Utilisateur"

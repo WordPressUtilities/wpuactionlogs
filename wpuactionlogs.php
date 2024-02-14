@@ -4,8 +4,8 @@ defined('ABSPATH') || die;
 Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
-Description: WPU Action Logs is a wonderful plugin.
-Version: 0.9.0
+Description: Useful logs about what’s happening on your website admin.
+Version: 0.10.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -23,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.9.0';
+    private $plugin_version = '0.10.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -63,7 +63,7 @@ class WPUActionLogs {
         if (!load_plugin_textdomain('wpuactionlogs', false, $lang_dir)) {
             load_muplugin_textdomain('wpuactionlogs', $lang_dir);
         }
-        $this->plugin_description = __('WPU Action Logs is a wonderful plugin.', 'wpuactionlogs');
+        $this->plugin_description = __('Useful logs about what’s happening on your website admin.', 'wpuactionlogs');
     }
 
     # ADMIN PAGES
@@ -94,13 +94,13 @@ class WPUActionLogs {
             'level' => 'manage_options',
             'basename' => plugin_basename(__FILE__)
         );
-        include __DIR__ . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
+        require_once __DIR__ . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
         $this->adminpages = new \wpuactionlogs\WPUBaseAdminPage();
         $this->adminpages->init($pages_options, $admin_pages);
     }
 
     function load_update() {
-        include __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpuactionlogs\WPUBaseUpdate(
             'WordPressUtilities',
             'wpuactionlogs',
@@ -109,7 +109,7 @@ class WPUActionLogs {
 
     # CUSTOM TABLE
     public function load_custom_table() {
-        include __DIR__ . '/inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php';
+        require_once __DIR__ . '/inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php';
         $this->baseadmindatas = new \wpuactionlogs\WPUBaseAdminDatas();
         $this->baseadmindatas->init(array(
             'handle_database' => false,
@@ -182,9 +182,14 @@ class WPUActionLogs {
                 'label' => __('Emails', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Emails', 'wpuactionlogs')),
                 'type' => 'checkbox'
+            ),
+            'action__users' => array(
+                'label' => __('Users', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Users', 'wpuactionlogs')),
+                'type' => 'checkbox'
             )
         );
-        include __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
+        require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wpuactionlogs\WPUBaseSettings($this->settings_details, $this->settings);
     }
 
@@ -336,6 +341,11 @@ class WPUActionLogs {
         add_filter('wp_mail', array(&$this,
             'action__mails'
         ), 9999, 1);
+
+        /* Users */
+        add_filter('wp_update_user', array(&$this,
+            'action__users'
+        ), 9999, 2);
     }
 
     function action__posts($post_id) {
@@ -460,6 +470,15 @@ class WPUActionLogs {
     function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
         if ($this->settings_obj->get_setting('action__wp_update_nav_menu') == '1' && $menu_data) {
             $this->log_line($menu_data);
+        }
+    }
+
+    function action__users($user_id, $userdata = array()) {
+        if ($this->settings_obj->get_setting('action__users') == '1' && $userdata) {
+            $this->log_line(array(
+                'user_id' => $user_id,
+                'user_login' => $userdata['user_login']
+            ));
         }
     }
 
