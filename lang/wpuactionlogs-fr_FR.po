@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2024-02-14 23:36+0700\n"
+"POT-Creation-Date: 2024-02-15 23:00+0700\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -28,15 +28,15 @@ msgstr "Réglages"
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: wpuactionlogs.php:126 wpuactionlogs.php:222
+#: wpuactionlogs.php:126 wpuactionlogs.php:250
 msgid "Action type"
 msgstr "Type d’action"
 
-#: wpuactionlogs.php:130 wpuactionlogs.php:223
+#: wpuactionlogs.php:130 wpuactionlogs.php:251
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: wpuactionlogs.php:135 wpuactionlogs.php:224
+#: wpuactionlogs.php:135 wpuactionlogs.php:252
 msgid "Action interface"
 msgstr "Interface"
 
@@ -44,55 +44,88 @@ msgstr "Interface"
 msgid "Actions"
 msgstr "Actions"
 
-#: wpuactionlogs.php:159
+#: wpuactionlogs.php:157
+msgid "Interfaces"
+msgstr "Interfaces"
+
+#: wpuactionlogs.php:162
 #, php-format
 msgid "Enable logs for “%s”"
 msgstr "Activer les journaux pour les « %s »"
 
-#: wpuactionlogs.php:162 wpuactionlogs.php:163
+#: wpuactionlogs.php:163
+#, php-format
+msgid "Disable logs on %s"
+msgstr "Désactiver les journaux pour %s"
+
+#: wpuactionlogs.php:166 wpuactionlogs.php:167
 msgid "Posts"
 msgstr "Publications"
 
-#: wpuactionlogs.php:167 wpuactionlogs.php:168
+#: wpuactionlogs.php:172 wpuactionlogs.php:173
 msgid "Menus"
 msgstr "Menus"
 
-#: wpuactionlogs.php:172 wpuactionlogs.php:173
+#: wpuactionlogs.php:178 wpuactionlogs.php:179
 msgid "Terms"
 msgstr "Termes"
 
-#: wpuactionlogs.php:177 wpuactionlogs.php:178
+#: wpuactionlogs.php:184 wpuactionlogs.php:185
 msgid "Options"
 msgstr "Options"
 
-#: wpuactionlogs.php:182 wpuactionlogs.php:183
+#: wpuactionlogs.php:190 wpuactionlogs.php:191
 msgid "Emails"
 msgstr "Emails"
 
-#: wpuactionlogs.php:187 wpuactionlogs.php:188
+#: wpuactionlogs.php:196 wpuactionlogs.php:197
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: wpuactionlogs.php:205
+#: wpuactionlogs.php:202
+msgid "Disable on web"
+msgstr "Désactiver sur web"
+
+#: wpuactionlogs.php:203
+msgid "web interface"
+msgstr "l’interface web"
+
+#: wpuactionlogs.php:208
+msgid "Disable on cron"
+msgstr "Désactiver sur cron"
+
+#: wpuactionlogs.php:209
+msgid "cron interface"
+msgstr "l’interface cron"
+
+#: wpuactionlogs.php:214
+msgid "Disable on CLI"
+msgstr "Désactiver sur CLI"
+
+#: wpuactionlogs.php:215
+msgid "CLI interface"
+msgstr "l’interface CLI"
+
+#: wpuactionlogs.php:233
 msgid "Select an user: "
 msgstr "Sélectionnez un utilisateur : "
 
-#: wpuactionlogs.php:206
+#: wpuactionlogs.php:234
 msgid "All"
 msgstr "Tous"
 
-#: wpuactionlogs.php:219
+#: wpuactionlogs.php:247
 msgid "ID"
 msgstr "ID"
 
-#: wpuactionlogs.php:220
+#: wpuactionlogs.php:248
 msgid "Date"
 msgstr "Date"
 
-#: wpuactionlogs.php:221
+#: wpuactionlogs.php:249
 msgid "Account"
 msgstr "Compte"
 
-#: wpuactionlogs.php:273
+#: wpuactionlogs.php:301
 msgid "Save Changes"
 msgstr "Sauvegarder"

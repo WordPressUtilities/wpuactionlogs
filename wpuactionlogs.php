@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.10.0
+Version: 0.11.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -23,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.10.0';
+    private $plugin_version = '0.11.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -152,41 +152,69 @@ class WPUActionLogs {
             'sections' => array(
                 'actions' => array(
                     'name' => __('Actions', 'wpuactionlogs')
+                ),
+                'interfaces' => array(
+                    'name' => __('Interfaces', 'wpuactionlogs')
                 )
             )
         );
 
         $action_string = __('Enable logs for “%s”', 'wpuactionlogs');
+        $interface_string = __('Disable logs on %s', 'wpuactionlogs');
         $this->settings = array(
             'action__posts' => array(
                 'label' => __('Posts', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Posts', 'wpuactionlogs')),
-                'type' => 'checkbox'
+                'type' => 'checkbox',
+                'section' => 'actions'
             ),
             'action__wp_update_nav_menu' => array(
                 'label' => __('Menus', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Menus', 'wpuactionlogs')),
-                'type' => 'checkbox'
+                'type' => 'checkbox',
+                'section' => 'actions'
             ),
             'action__terms' => array(
                 'label' => __('Terms', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Terms', 'wpuactionlogs')),
-                'type' => 'checkbox'
+                'type' => 'checkbox',
+                'section' => 'actions'
             ),
             'action__options' => array(
                 'label' => __('Options', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Options', 'wpuactionlogs')),
-                'type' => 'checkbox'
+                'type' => 'checkbox',
+                'section' => 'actions'
             ),
             'action__mails' => array(
                 'label' => __('Emails', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Emails', 'wpuactionlogs')),
-                'type' => 'checkbox'
+                'type' => 'checkbox',
+                'section' => 'actions'
             ),
             'action__users' => array(
                 'label' => __('Users', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Users', 'wpuactionlogs')),
-                'type' => 'checkbox'
+                'type' => 'checkbox',
+                'section' => 'actions'
+            ),
+            'interface_web_disabled' => array(
+                'label' => __('Disable on web', 'wpuactionlogs'),
+                'label_check' => sprintf($interface_string, __('web interface', 'wpuactionlogs')),
+                'type' => 'checkbox',
+                'section' => 'interfaces'
+            ),
+            'interface_cron_disabled' => array(
+                'label' => __('Disable on cron', 'wpuactionlogs'),
+                'label_check' => sprintf($interface_string, __('cron interface', 'wpuactionlogs')),
+                'type' => 'checkbox',
+                'section' => 'interfaces'
+            ),
+            'interface_cli_disabled' => array(
+                'label' => __('Disable on CLI', 'wpuactionlogs'),
+                'label_check' => sprintf($interface_string, __('CLI interface', 'wpuactionlogs')),
+                'type' => 'checkbox',
+                'section' => 'interfaces'
             )
         );
         require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
@@ -299,6 +327,25 @@ class WPUActionLogs {
     ---------------------------------------------------------- */
 
     public function load_actions() {
+
+        $is_cli = php_sapi_name() == 'cli';
+        $is_web = !$is_cli;
+        $is_cron = wp_doing_cron();
+
+        if ($is_cli && $this->settings_obj->get_setting('interface_cli_disabled') == '1') {
+            return;
+        }
+
+        if ($is_web && $this->settings_obj->get_setting('interface_web_disabled') == '1') {
+            return;
+        }
+
+        if ($is_cron && $this->settings_obj->get_setting('interface_cron_disabled') == '1') {
+            return;
+        }
+
+
+        /* Posts */
         $post_hooks = array(
             'save_post',
             'delete_post'
@@ -440,7 +487,7 @@ class WPUActionLogs {
 
         /* Excluded end */
         $excluded_options_end = apply_filters('wpuactionlogs__action__options__excluded_options_end', array(
-            '__cron_hook_lastexec',
+            '__cron_hook_lastexec'
         ));
 
         foreach ($excluded_options_end as $end) {
