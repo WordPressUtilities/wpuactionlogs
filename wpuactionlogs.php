@@ -5,12 +5,12 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.11.0
+Version: 0.11.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
 Domain Path: /lang
-Requires at least: 6.0
+Requires at least: 6.2
 Requires PHP: 8.0
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
@@ -23,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.11.0';
+    private $plugin_version = '0.11.1';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -295,6 +295,7 @@ class WPUActionLogs {
     }
 
     public function page_content__subpage() {
+        settings_errors();
         echo '<form action="' . admin_url('options.php') . '" method="post">';
         settings_fields($this->settings_details['option_id']);
         do_settings_sections($this->settings_details['plugin_id']);
@@ -344,6 +345,9 @@ class WPUActionLogs {
             return;
         }
 
+        if(apply_filters('wpuactionlogs__actions__disable_save_logs', false)){
+            return;
+        }
 
         /* Posts */
         $post_hooks = array(
