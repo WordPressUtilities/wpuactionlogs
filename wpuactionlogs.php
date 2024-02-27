@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.11.1
+Version: 0.12.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -23,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.11.1';
+    private $plugin_version = '0.12.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -307,7 +307,7 @@ class WPUActionLogs {
       Log
     ---------------------------------------------------------- */
 
-    function log_line($args) {
+    function log_line($args, $extra = array()) {
 
         if (!is_array($args)) {
             $args = array(
@@ -315,8 +315,15 @@ class WPUActionLogs {
             );
         }
 
+        if (!is_array($extra)) {
+            $extra = array();
+        }
+        if (!isset($extra['user_id'])) {
+            $extra['user_id'] = get_current_user_id();
+        }
+
         $this->baseadmindatas->create_line(array(
-            'user_id' => get_current_user_id(),
+            'user_id' => $extra['user_id'],
             'action_interface' => php_sapi_name(),
             'action_type' => current_action(),
             'action_detail' => json_encode($args)
@@ -345,7 +352,7 @@ class WPUActionLogs {
             return;
         }
 
-        if(apply_filters('wpuactionlogs__actions__disable_save_logs', false)){
+        if (apply_filters('wpuactionlogs__actions__disable_save_logs', false)) {
             return;
         }
 
@@ -389,14 +396,21 @@ class WPUActionLogs {
         }
 
         /* Emails */
-        add_filter('wp_mail', array(&$this,
+        add_action('wp_mail', array(&$this,
             'action__mails'
         ), 9999, 1);
 
         /* Users */
-        add_filter('wp_update_user', array(&$this,
-            'action__users'
-        ), 9999, 2);
+        $user_hooks = array(
+            'wp_update_user',
+            'wp_logout',
+            'wp_login'
+        );
+        foreach ($user_hooks as $user_hook) {
+            add_action($user_hook, array(&$this,
+                'action__users'
+            ), 99, 1);
+        }
     }
 
     function action__posts($post_id) {
@@ -525,7 +539,32 @@ class WPUActionLogs {
     }
 
     function action__users($user_id, $userdata = array()) {
-        if ($this->settings_obj->get_setting('action__users') == '1' && $userdata) {
+        $settings = array();
+        $current_action = current_action();
+        if (!$this->settings_obj->get_setting('action__users') == '1') {
+            return;
+        }
+        if ($user_id && $current_action == 'wp_login') {
+            if (!is_numeric($user_id)) {
+                $user = get_user_by('login', $user_id);
+                if (is_object($user)) {
+                    $user_id = $user->ID;
+                }
+            }
+            $this->log_line(array(
+            ), array(
+                'user_id' => $user_id
+            ));
+            return;
+        }
+        if ($user_id && $current_action == 'wp_logout') {
+            $this->log_line(array(
+            ), array(
+                'user_id' => $user_id
+            ));
+            return;
+        }
+        if ($userdata) {
             $this->log_line(array(
                 'user_id' => $user_id,
                 'user_login' => $userdata['user_login']
