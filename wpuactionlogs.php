@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.12.0
+Version: 0.13.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -23,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.12.0';
+    private $plugin_version = '0.13.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -131,6 +131,10 @@ class WPUActionLogs {
                     'type' => 'sql',
                     'sql' => 'TEXT'
                 ),
+                'action_source' => array(
+                    'public_name' => __('Action source', 'wpuactionlogs'),
+                    'type' => 'varchar'
+                ),
                 'action_interface' => array(
                     'public_name' => __('Action interface', 'wpuactionlogs'),
                     'type' => 'varchar'
@@ -221,7 +225,34 @@ class WPUActionLogs {
         $this->settings_obj = new \wpuactionlogs\WPUBaseSettings($this->settings_details, $this->settings);
     }
 
+    function get_call_stack() {
+        $backtrace = debug_backtrace();
+        $files = array();
+        foreach ($backtrace as $trace) {
+            if (!isset($trace['file'])) {
+                continue;
+            }
+            if (strpos($trace['file'], 'wp-content/') === false) {
+                continue;
+            }
+            preg_match('/wp-content\/([a-z0-9-_]+)\/([a-z0-9-_]+)\//isU', $trace['file'], $matches);
+            if (!$matches) {
+                continue;
+            }
+            $files[] = $matches[1] . '/' . $matches[2];
+        }
+        $files = array_unique($files);
+
+        if (count($files) > 1 && ($key = array_search('plugins/wpuactionlogs', $files)) !== false) {
+            unset($files[$key]);
+        }
+
+        return $files;
+
+    }
+
     public function page_content__main() {
+
         add_filter('wpubaseadmindatas_cellcontent', array(&$this, 'wpubaseadmindatas_cellcontent'), 10, 3);
 
         /* Filter by user */
@@ -248,6 +279,7 @@ class WPUActionLogs {
                     'creation' => __('Date', 'wpuactionlogs'),
                     'user_id' => __('Account', 'wpuactionlogs'),
                     'action_type' => __('Action type', 'wpuactionlogs'),
+                    'action_source' => __('Action source', 'wpuactionlogs'),
                     'action_detail' => __('Action detail', 'wpuactionlogs'),
                     'action_interface' => __('Action interface', 'wpuactionlogs')
                 )
@@ -272,6 +304,12 @@ class WPUActionLogs {
         }
         if ($cell_id == 'action_type') {
             $cellcontent = '<a href="' . esc_url($filter_url) . '">' . esc_html($cellcontent) . '</a>';
+        }
+        if ($cell_id == 'action_source') {
+            $cellcontent_raw = json_decode($cellcontent, 1);
+            if ($cellcontent_raw) {
+                $cellcontent = implode('<br/>', $cellcontent_raw);
+            }
         }
         if ($cell_id == 'action_detail') {
             $data = json_decode($cellcontent, 1);
@@ -324,6 +362,7 @@ class WPUActionLogs {
 
         $this->baseadmindatas->create_line(array(
             'user_id' => $extra['user_id'],
+            'action_source' => json_encode($this->get_call_stack()),
             'action_interface' => php_sapi_name(),
             'action_type' => current_action(),
             'action_detail' => json_encode($args)
