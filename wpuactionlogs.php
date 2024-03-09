@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.13.1
+Version: 0.14.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -23,7 +23,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.13.1';
+    private $plugin_version = '0.14.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -199,6 +199,12 @@ class WPUActionLogs {
             'action__users' => array(
                 'label' => __('Users', 'wpuactionlogs'),
                 'label_check' => sprintf($action_string, __('Users', 'wpuactionlogs')),
+                'type' => 'checkbox',
+                'section' => 'actions'
+            ),
+            'action__plugins' => array(
+                'label' => __('Plugins', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Plugins', 'wpuactionlogs')),
                 'type' => 'checkbox',
                 'section' => 'actions'
             ),
@@ -455,6 +461,17 @@ class WPUActionLogs {
         foreach ($user_hooks as $user_hook) {
             add_action($user_hook, array(&$this,
                 'action__users'
+            ), 99, 2);
+        }
+
+        /* Plugins */
+        $plugin_hooks = array(
+            'activate_plugin',
+            'deactivate_plugin'
+        );
+        foreach ($plugin_hooks as $plugin_hook) {
+            add_action($plugin_hook, array(&$this,
+                'action__plugins'
             ), 99, 1);
         }
     }
@@ -616,6 +633,17 @@ class WPUActionLogs {
                 'user_login' => $userdata['user_login']
             ));
         }
+    }
+
+    function action__plugins($plugin) {
+        $settings = array();
+        $current_action = current_action();
+        if (!$this->settings_obj->get_setting('action__plugins') == '1') {
+            return;
+        }
+        $this->log_line(array(
+            'plugin' => $plugin
+        ));
     }
 
     /* ----------------------------------------------------------
