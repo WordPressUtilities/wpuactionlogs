@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2024-03-09 23:00+0100\n"
+"POT-Creation-Date: 2024-03-10 19:44+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,7 +14,76 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: inc\n"
+"X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminPage\n"
+"X-Poedit-SearchPathExcluded-1: inc/WPUBaseSettings\n"
+"X-Poedit-SearchPathExcluded-2: inc/WPUBaseUpdate\n"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:557
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:799
+msgid "New Post"
+msgstr "Nouvel article"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:559
+msgid "Back"
+msgstr "Retour"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:578
+msgid "No"
+msgstr "Non"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:579
+msgid "Yes"
+msgstr "Oui"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:593
+msgid "Submit"
+msgstr "Envoyer"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:762
+#, php-format
+msgid "Items %s - %s"
+msgstr "Articles %s - %s"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:775
+#, php-format
+msgid "<strong>Filter :</strong> %s • <strong>Value :</strong> %s"
+msgstr "<strong>Filtre:</strong> %s • <strong>Valeur :</strong> %s"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:776
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:785
+msgid "Search"
+msgstr "Rechercher"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:787
+msgid "Clear"
+msgstr "Vider"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:844
+msgid "Show more details"
+msgstr "Afficher plus de détails"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:850
+msgid "Edit"
+msgstr "Modifier"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:850
+msgid "View"
+msgstr "Voir"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:857
+msgid "Delete"
+msgstr "Supprimer"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:863
+msgid "Export all"
+msgstr "Tout exporter"
+
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:865
+msgid "Export filtered view"
+msgstr "Exporter la vue filtrée"
 
 #: wpuactionlogs.php:66
 msgid "Useful logs about what’s happening on your website admin."
