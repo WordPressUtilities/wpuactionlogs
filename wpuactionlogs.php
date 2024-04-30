@@ -5,13 +5,14 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.14.1
+Version: 0.15.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
 Domain Path: /lang
 Requires at least: 6.2
 Requires PHP: 8.0
+Network: Optional
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
@@ -23,7 +24,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.14.1';
+    private $plugin_version = '0.15.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -327,11 +328,31 @@ class WPUActionLogs {
         if ($cell_id == 'action_detail') {
             $data = json_decode($cellcontent, 1);
             if (is_array($data)) {
+                $cellcontent = '';
+
                 if (isset($data['to'], $data['subject'], $data['message'])) {
                     $data['message'] = $this->text_truncate($data['message'], 100);
                 }
-                $cellcontent = '';
-                $cellcontent .= '<ul style="margin:0">';
+                /* Post ids */
+                $post_id = false;
+                if (isset($data['post_id'])) {
+                    $post_id = $data['post_id'];
+                    $data['post_id'] = '<a href="' . get_edit_post_link($data['post_id']) . '">' . $data['post_id'] . '</a>';
+                }
+
+                /* Attachments */
+                if ($post_id && isset($data['post_type']) && $data['post_type'] == 'attachment') {
+                    $image_html = wp_get_attachment_image($post_id, 'thumbnail', false, array('style' => 'max-width:50px;height:auto;float:left;margin-right:1em;'));
+                    $cellcontent .= '<a href="' . get_edit_post_link($post_id) . '">' . $image_html . '</a>';;
+                }
+
+                /* Crop post_title */
+                if (isset($data['post_title'])) {
+                    $data['post_title'] = $this->text_truncate($data['post_title'], 50);
+                }
+
+                /* Cells */
+                $cellcontent .= '<ul style="margin:0;overflow:hidden;">';
                 foreach ($data as $key => $var) {
                     $var_display = $var;
                     if (is_array($var_display) && isset($var_display[0])) {
@@ -340,6 +361,7 @@ class WPUActionLogs {
                     $cellcontent .= '<li style="margin:0"><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
                 }
                 $cellcontent .= '</ul>';
+
             }
         }
         return $cellcontent;
@@ -410,6 +432,7 @@ class WPUActionLogs {
 
         /* Posts */
         $post_hooks = array(
+            'edit_attachment',
             'save_post',
             'delete_post'
         );
