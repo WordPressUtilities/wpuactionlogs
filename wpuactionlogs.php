@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.15.0
+Version: 0.16.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -24,7 +24,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.15.0';
+    private $plugin_version = '0.16.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs'
@@ -52,6 +52,12 @@ class WPUActionLogs {
         add_filter('plugins_loaded', array(&$this,
             'load_actions'
         ));
+        add_action('admin_init', array(&$this,
+            'log_current_user_action'
+        ));
+        add_action('admin_bar_menu', array(&$this,
+            'admin_bar_menu_display_active_users'
+        ), 999);
     }
 
     /* ----------------------------------------------------------
@@ -160,6 +166,9 @@ class WPUActionLogs {
                 ),
                 'interfaces' => array(
                     'name' => __('Interfaces', 'wpuactionlogs')
+                ),
+                'extras' => array(
+                    'name' => __('Extras', 'wpuactionlogs')
                 )
             )
         );
@@ -226,6 +235,11 @@ class WPUActionLogs {
                 'label_check' => sprintf($interface_string, __('CLI interface', 'wpuactionlogs')),
                 'type' => 'checkbox',
                 'section' => 'interfaces'
+            ),
+            'extras__display_active_users' => array(
+                'label' => __('Display active users', 'wpuactionlogs'),
+                'type' => 'checkbox',
+                'section' => 'extras'
             )
         );
         require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
@@ -667,6 +681,108 @@ class WPUActionLogs {
         $this->log_line(array(
             'plugin' => $plugin
         ));
+    }
+
+    /* ----------------------------------------------------------
+      Extras
+    ---------------------------------------------------------- */
+
+    function log_current_user_action() {
+        if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
+            return;
+        }
+        $this->log_line(array(
+            'action' => current_action()
+        ));
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            return;
+        }
+        if (!is_user_logged_in()) {
+            return;
+        }
+        $current_page = $this->get_current_page();
+        if (!$current_page) {
+            return;
+        }
+        $current_user = wp_get_current_user();
+        $transient_key = 'user_last_page_' . $current_user->ID;
+        set_transient($transient_key, $current_page, 60);
+    }
+
+    function admin_bar_menu_display_active_users() {
+        if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
+            return;
+        }
+        if (!current_user_can('edit_users')) {
+            return;
+        }
+
+        $current_page = $this->get_current_page();
+        if (!$current_page) {
+            return;
+        }
+
+        $active_users = $this->get_others_active_users_on_this_page();
+        if (!$active_users || count($active_users) < 2) {
+            return;
+        }
+
+        $avatars_html = '';
+        $number_users_max = 3;
+        foreach ($active_users as $active_user) {
+            if ($number_users_max-- == 0) {
+                $avatars_html .= ' &hellip;';
+                break;
+            }
+            $avatars_html .= '<img src="' . $active_user['avatar'] . '" alt="' . esc_attr($active_user['name']) . '" title="' . esc_attr($active_user['name']) . '" style="height:1em;width:1em;margin-left:0.3em;vertical-align: middle;border-radius: 99em;" />';
+        }
+
+        global $wp_admin_bar;
+        $args = [
+            'id' => 'wpuactionlogs-active-users',
+            'title' => __('Online here:', 'wpuactionlogs') . ' ' . $avatars_html
+        ];
+        $wp_admin_bar->add_node($args);
+        $users = get_users(['role__not_in' => ['subscriber']]);
+
+        foreach ($active_users as $user) {
+            $wp_admin_bar->add_node([
+                'id' => $user['id'],
+                'title' => $user['name'],
+                'parent' => 'wpuactionlogs-active-users'
+            ]);
+        }
+    }
+
+    function get_current_page() {
+        $current_page = esc_url($_SERVER['REQUEST_URI']);
+        $current_page = remove_query_arg('wp_http_referer', $current_page);
+        $excluded_pages = array(
+            '/wp-admin/profile.php'
+        );
+        if (in_array($current_page, $excluded_pages)) {
+            return false;
+        }
+        return $current_page;
+    }
+
+    function get_others_active_users_on_this_page() {
+        $current_page = $this->get_current_page();
+        $users = get_users(['role__not_in' => ['subscriber']]);
+        $active_users = [];
+        foreach ($users as $user) {
+            $transient_key = 'user_last_page_' . $user->ID;
+            $last_page = get_transient($transient_key);
+            if ($last_page == $current_page) {
+                $active_users[] = [
+                    'id' => $user->ID,
+                    'name' => $user->display_name,
+                    'last_page' => $last_page,
+                    'avatar' => get_avatar_url($user->ID, ['size' => 16])
+                ];
+            }
+        }
+        return $active_users;
     }
 
     /* ----------------------------------------------------------
