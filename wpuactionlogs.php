@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.16.0
+Version: 0.17.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -24,10 +24,11 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.16.0';
+    private $plugin_version = '0.17.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
-        'name' => 'WPU Action Logs'
+        'name' => 'WPU Action Logs',
+        'transient_action_prefix' => 'user_last_page_'
     );
     private $settings_obj;
     private $last_post_id;
@@ -357,7 +358,7 @@ class WPUActionLogs {
                 /* Attachments */
                 if ($post_id && isset($data['post_type']) && $data['post_type'] == 'attachment') {
                     $image_html = wp_get_attachment_image($post_id, 'thumbnail', false, array('style' => 'max-width:50px;height:auto;float:left;margin-right:1em;'));
-                    $cellcontent .= '<a href="' . get_edit_post_link($post_id) . '">' . $image_html . '</a>';;
+                    $cellcontent .= '<a href="' . get_edit_post_link($post_id) . '">' . $image_html . '</a>';
                 }
 
                 /* Crop post_title */
@@ -705,8 +706,7 @@ class WPUActionLogs {
             return;
         }
         $current_user = wp_get_current_user();
-        $transient_key = 'user_last_page_' . $current_user->ID;
-        set_transient($transient_key, $current_page, 60);
+        set_transient($this->plugin_settings['transient_action_prefix'] . $current_user->ID, $current_page, 60);
     }
 
     function admin_bar_menu_display_active_users() {
@@ -729,49 +729,90 @@ class WPUActionLogs {
 
         $avatars_html = '';
         $number_users_max = 3;
-        foreach ($active_users as $active_user) {
+        foreach ($active_users as $i => $active_user) {
             if ($number_users_max-- == 0) {
                 $avatars_html .= ' &hellip;';
                 break;
             }
-            $avatars_html .= '<img src="' . $active_user['avatar'] . '" alt="' . esc_attr($active_user['name']) . '" title="' . esc_attr($active_user['name']) . '" style="height:1em;width:1em;margin-left:0.3em;vertical-align: middle;border-radius: 99em;" />';
+            $avatars_html .= '<img loading="lazy" src="' . $active_user['avatar'] . '" alt="' . esc_attr($active_user['name']) . '" title="' . esc_attr($active_user['name']) . '" style="height:1em;width:1em;margin-left:0.3em;vertical-align: middle;border-radius: 99em;" />';
         }
 
         global $wp_admin_bar;
+        $menu_id = 'wpuactionlogs-active-users';
         $args = [
-            'id' => 'wpuactionlogs-active-users',
+            'id' => $menu_id,
             'title' => __('Online here:', 'wpuactionlogs') . ' ' . $avatars_html
         ];
         $wp_admin_bar->add_node($args);
-        $users = get_users(['role__not_in' => ['subscriber']]);
-
         foreach ($active_users as $user) {
+            $title_html = '<img loading="lazy" src="' . $user['avatar'] . '" alt="" title="' . esc_attr($user['name']) . '" style="height:1em;width:1em;margin-right:0.3em;vertical-align: middle;border-radius: 99em;" />';
+            $title_html .= $user['name'] . ($user['id'] == get_current_user_id() ? ' ' . __('(you)', 'wpuactionlogs') : '');
             $wp_admin_bar->add_node([
-                'id' => $user['id'],
-                'title' => $user['name'],
-                'parent' => 'wpuactionlogs-active-users'
+                'id' => $menu_id . '-' . $user['id'],
+                'title' => $title_html,
+                'parent' => $menu_id
             ]);
         }
     }
 
     function get_current_page() {
+
+        /* Retrieve URI */
         $current_page = esc_url($_SERVER['REQUEST_URI']);
-        $current_page = remove_query_arg('wp_http_referer', $current_page);
+
+        /* Exclude some args */
+        $excluded_args = array(
+            'error',
+            'info',
+            'message',
+            'notice',
+            'success',
+            'updated',
+            'warning',
+            'wp_http_referer'
+        );
+        foreach ($excluded_args as $excluded_arg) {
+            $current_page = remove_query_arg($excluded_arg, $current_page);
+        }
+
+        /* Do not track some pages */
         $excluded_pages = array(
             '/wp-admin/profile.php'
         );
         if (in_array($current_page, $excluded_pages)) {
             return false;
         }
+
+        /* Ignore some URL parts */
+        $ignored_parts = array(
+            array('/index.php', '/')
+        );
+        foreach ($ignored_parts as $ignored_part) {
+            $current_page = str_replace($ignored_part[0], $ignored_part[1], $current_page);
+        }
+
         return $current_page;
     }
 
     function get_others_active_users_on_this_page() {
-        $current_page = $this->get_current_page();
-        $users = get_users(['role__not_in' => ['subscriber']]);
+        global $wpdb;
+        $users_with_transient = [];
+        $q = "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_{$this->plugin_settings['transient_action_prefix']}%'";
+        $results = $wpdb->get_results($q);
+        foreach ($results as $result) {
+            $users_with_transient[] = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $result->option_name);
+        }
+        if (!$users_with_transient) {
+            return;
+        }
+
+        $users = get_users(['user__in' => $users_with_transient]);
+
+        /* List users */
         $active_users = [];
+        $current_page = $this->get_current_page();
         foreach ($users as $user) {
-            $transient_key = 'user_last_page_' . $user->ID;
+            $transient_key = $this->plugin_settings['transient_action_prefix'] . $user->ID;
             $last_page = get_transient($transient_key);
             if ($last_page == $current_page) {
                 $active_users[] = [
