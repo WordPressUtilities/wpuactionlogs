@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2024-05-09 11:28+0200\n"
+"POT-Creation-Date: 2024-05-10 21:04+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -215,10 +215,10 @@ msgstr "Compte"
 msgid "Save Changes"
 msgstr "Sauvegarder"
 
-#: wpuactionlogs.php:744
+#: wpuactionlogs.php:741
 msgid "Online here:"
 msgstr "En ligne ici :"
 
-#: wpuactionlogs.php:749
+#: wpuactionlogs.php:746
 msgid "(you)"
 msgstr "(vous)"
