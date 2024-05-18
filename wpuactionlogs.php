@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.17.2
+Version: 0.18.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -18,13 +18,14 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
+    public $basecron;
     public $plugin_description;
     public $adminpages;
     public $settings_update;
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.17.2';
+    private $plugin_version = '0.18.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -51,6 +52,9 @@ class WPUActionLogs {
             'load_settings'
         ));
         add_filter('plugins_loaded', array(&$this,
+            'load_cron'
+        ));
+        add_filter('plugins_loaded', array(&$this,
             'load_actions'
         ));
         add_action('admin_init', array(&$this,
@@ -59,6 +63,9 @@ class WPUActionLogs {
         add_action('admin_bar_menu', array(&$this,
             'admin_bar_menu_display_active_users'
         ), 999);
+        add_action('wpuactionlogs__cron_hook', array(&$this,
+            'wpuactionlogs__callback_function'
+        ), 10);
     }
 
     /* ----------------------------------------------------------
@@ -124,7 +131,7 @@ class WPUActionLogs {
             'can_edit' => true,
             'plugin_id' => $this->plugin_settings['id'],
             'plugin_pageid' => $this->admin_page_id,
-            'table_name' => 'wpuactionlogs',
+            'table_name' => $this->plugin_settings['id'],
             'table_fields' => array(
                 'user_id' => array(
                     'public_name' => __('User ID', 'wpuactionlogs'),
@@ -240,6 +247,12 @@ class WPUActionLogs {
             'extras__display_active_users' => array(
                 'label' => __('Display active users', 'wpuactionlogs'),
                 'type' => 'checkbox',
+                'section' => 'extras'
+            ),
+            'extras__purge_after' => array(
+                'label' => __('Purge after N days', 'wpuactionlogs'),
+                'help' => __('Logs will be automatically deleted after this number of days. Set to 0 to disable', 'wpuactionlogs'),
+                'type' => 'number',
                 'section' => 'extras'
             )
         );
@@ -686,6 +699,52 @@ class WPUActionLogs {
     }
 
     /* ----------------------------------------------------------
+      Cron & Cleanup
+    ---------------------------------------------------------- */
+
+    public function load_cron() {
+        require_once __DIR__ . '/inc/WPUBaseCron/WPUBaseCron.php';
+        $this->basecron = new \wpuactionlogs\WPUBaseCron(array(
+            'pluginname' => 'WPU Action Logs',
+            'cronhook' => 'wpuactionlogs__cron_hook',
+            'croninterval' => 3600
+        ));
+    }
+
+    public function wpuactionlogs__callback_function() {
+        $this->purge_old_actions();
+    }
+
+    public function purge_old_actions() {
+        global $wpdb;
+
+        /* Stop if purge is not needed */
+        $number_of_days = $this->settings_obj->get_setting('extras__purge_after');
+        if (!$number_of_days || !is_numeric($number_of_days)) {
+            return false;
+        }
+
+        /* Prepare the query selecting old logs */
+        $table = $this->plugin_settings['id'];
+        $q_suffix = $wpdb->prepare(" {$wpdb->prefix}{$table} WHERE creation < DATE_SUB(NOW(), INTERVAL %d DAY)", $number_of_days);
+
+        /* Stop if no lines will be deleted */
+        $number_of_deleted_lines = $wpdb->get_var("SELECT COUNT(*) FROM $q_suffix");
+        if (!$number_of_deleted_lines) {
+            return false;
+        }
+
+        /* Delete */
+        $wpdb->query("DELETE FROM " . $q_suffix);
+
+        /* Log action */
+        $this->log_line(array(
+            'action' => 'purge_old_actions',
+            'deleted_lines' => $number_of_deleted_lines
+        ));
+    }
+
+    /* ----------------------------------------------------------
       Extras
     ---------------------------------------------------------- */
 
@@ -882,3 +941,17 @@ class WPUActionLogs {
 }
 
 $WPUActionLogs = new WPUActionLogs();
+
+if (defined('WP_CLI') && WP_CLI) {
+    /* Simple action */
+    WP_CLI::add_command('wpuactionlogs-purge', function ($args = array()) {
+        $WPUActionLogs = new WPUActionLogs();
+        $WPUActionLogs->load_settings();
+        $WPUActionLogs->load_custom_table();
+        $WPUActionLogs->purge_old_actions();
+        WP_CLI::success('Old action logs purged');
+    }, array(
+        'shortdesc' => 'Purge old action logs',
+        'synopsis' => array()
+    ));
+}
