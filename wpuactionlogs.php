@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.18.1
+Version: 0.19.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -25,7 +25,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.18.1';
+    private $plugin_version = '0.19.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -60,6 +60,18 @@ class WPUActionLogs {
         add_action('admin_init', array(&$this,
             'log_current_user_action'
         ));
+
+        add_action('wp_dashboard_setup', function () {
+            if (!$this->can_view_active_users()) {
+                return;
+            }
+            wp_add_dashboard_widget(
+                'wpuactionlogs_dashboard_widget',
+                __('Currently online', 'wpuactionlogs'),
+                array(&$this, 'dashboard_widget_content')
+            );
+        });
+
         add_action('admin_bar_menu', array(&$this,
             'admin_bar_menu_display_active_users'
         ), 999);
@@ -402,6 +414,23 @@ class WPUActionLogs {
         do_settings_sections($this->settings_details['plugin_id']);
         echo submit_button(__('Save Changes', 'wpuactionlogs'));
         echo '</form>';
+    }
+
+    /* ----------------------------------------------------------
+      Admin widget
+    ---------------------------------------------------------- */
+
+    function dashboard_widget_content() {
+        $active_users = $this->get_active_users();
+        if (!$active_users) {
+            echo '<p>' . __('No active users', 'wpuactionlogs') . '</p>';
+            return;
+        }
+        echo '<ul>';
+        foreach ($active_users as $user) {
+            echo '<li> • ' . $user->display_name . '</li>';
+        }
+        echo '</ul>';
     }
 
     /* ----------------------------------------------------------
@@ -748,6 +777,16 @@ class WPUActionLogs {
       Extras
     ---------------------------------------------------------- */
 
+    function can_view_active_users() {
+        if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
+            return false;
+        }
+        if (!current_user_can('edit_users')) {
+            return false;
+        }
+        return true;
+    }
+
     function log_current_user_action() {
         if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
             return;
@@ -767,10 +806,7 @@ class WPUActionLogs {
     }
 
     function admin_bar_menu_display_active_users() {
-        if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
-            return;
-        }
-        if (!current_user_can('edit_users')) {
+        if (!$this->can_view_active_users()) {
             return;
         }
 
@@ -851,7 +887,7 @@ class WPUActionLogs {
         return $current_page;
     }
 
-    function get_others_active_users_on_this_page() {
+    function get_active_users() {
         global $wpdb;
         $users_with_transient = [];
         $q = "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_{$this->plugin_settings['transient_action_prefix']}%'";
@@ -860,10 +896,16 @@ class WPUActionLogs {
             $users_with_transient[] = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $result->option_name);
         }
         if (!$users_with_transient) {
-            return;
+            return false;
         }
+        return get_users(array(
+            'include' => $users_with_transient
+        ));
+    }
 
-        $users = get_users(['user__in' => $users_with_transient]);
+    function get_others_active_users_on_this_page() {
+
+        $users = $this->get_active_users();
 
         /* List users */
         $active_users = [];
