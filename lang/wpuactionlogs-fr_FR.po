@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2024-05-28 18:36+0200\n"
+"POT-Creation-Date: 2024-06-02 22:44+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -87,8 +87,8 @@ msgid "Export filtered view"
 msgstr "Exporter la vue filtrée"
 
 #: inc/WPUBaseSettings/WPUBaseSettings.php:132
-#: inc/WPUBaseSettings/WPUBaseSettings.php:593
-#: inc/WPUBaseSettings/WPUBaseSettings.php:600 wpuactionlogs.php:113
+#: inc/WPUBaseSettings/WPUBaseSettings.php:615
+#: inc/WPUBaseSettings/WPUBaseSettings.php:622 wpuactionlogs.php:113
 #: wpuactionlogs.php:115
 msgid "Settings"
 msgstr "Réglages"
@@ -97,19 +97,23 @@ msgstr "Réglages"
 msgid "Check all"
 msgstr "Tout cocher"
 
-#: inc/WPUBaseSettings/WPUBaseSettings.php:326
+#: inc/WPUBaseSettings/WPUBaseSettings.php:206
+msgid "Uncheck all"
+msgstr "Tout décocher"
+
+#: inc/WPUBaseSettings/WPUBaseSettings.php:318
 msgid "Settings saved."
 msgstr "Paramètres sauvegardés."
 
-#: inc/WPUBaseSettings/WPUBaseSettings.php:386
+#: inc/WPUBaseSettings/WPUBaseSettings.php:378
 msgid "Upload New Media"
 msgstr ""
 
-#: inc/WPUBaseSettings/WPUBaseSettings.php:539
+#: inc/WPUBaseSettings/WPUBaseSettings.php:531
 msgid "Language"
 msgstr ""
 
-#: inc/WPUBaseSettings/WPUBaseSettings.php:615
+#: inc/WPUBaseSettings/WPUBaseSettings.php:637
 msgid "Save"
 msgstr ""
 
