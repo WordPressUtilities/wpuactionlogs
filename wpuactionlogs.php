@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.19.3
+Version: 0.20.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -18,6 +18,7 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUActionLogs {
+    public $wpubasemessages;
     public $basecron;
     public $plugin_description;
     public $adminpages;
@@ -25,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.19.3';
+    private $plugin_version = '0.20.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -50,6 +51,9 @@ class WPUActionLogs {
         ));
         add_filter('plugins_loaded', array(&$this,
             'load_settings'
+        ));
+        add_filter('plugins_loaded', array(&$this,
+            'load_messages'
         ));
         add_filter('plugins_loaded', array(&$this,
             'load_cron'
@@ -116,6 +120,18 @@ class WPUActionLogs {
                 'has_form' => false,
                 'function_content' => array(&$this,
                     'page_content__settings'
+                )
+            ),
+            'actions' => array(
+                'parent' => 'main',
+                'name' => __('Actions', 'wpuactionlogs'),
+                'settings_link' => false,
+                'has_form' => true,
+                'function_content' => array(&$this,
+                    'page_content__actions'
+                ),
+                'function_action' => array(&$this,
+                    'page_action__actions'
                 )
             )
         );
@@ -277,6 +293,11 @@ class WPUActionLogs {
         $this->settings_obj = new \wpuactionlogs\WPUBaseSettings($this->settings_details, $this->settings);
     }
 
+    function load_messages() {
+        require_once __DIR__ . '/inc/WPUBaseMessages/WPUBaseMessages.php';
+        $this->wpubasemessages = new \wpuactionlogs\WPUBaseMessages($this->plugin_settings['id']);
+    }
+
     function get_call_stack() {
         $backtrace = debug_backtrace();
         $files = array();
@@ -417,8 +438,36 @@ class WPUActionLogs {
         echo '<form action="' . admin_url('options.php') . '" method="post">';
         settings_fields($this->settings_details['option_id']);
         do_settings_sections($this->settings_details['plugin_id']);
-        echo submit_button(__('Save Changes', 'wpuactionlogs'));
+        submit_button(__('Save Changes', 'wpuactionlogs'));
         echo '</form>';
+    }
+
+    /* ----------------------------------------------------------
+        Actions
+    ---------------------------------------------------------- */
+
+    function page_content__actions() {
+        submit_button(__('Purge old logs', 'wpuactionlogs'), 'primary', 'purge_old_logs');
+        submit_button(__('Delete all logs', 'wpuactionlogs'), 'secondary', 'delete_old_logs');
+    }
+
+    function page_action__actions() {
+
+        if (!isset($_POST['purge_old_logs']) && !isset($_POST['delete_old_logs'])) {
+            return;
+        }
+
+        if (isset($_POST['delete_old_logs'])) {
+            global $wpdb;
+            $wpdb->query("DELETE FROM {$wpdb->prefix}{$this->plugin_settings['id']}");
+            $this->wpubasemessages->set_message('wpuactionlogs_delete_old_logs_success', __('All logs have been deleted', 'wpuactionlogs'), 'updated');
+            return;
+        }
+        if (isset($_POST['purge_old_logs'])) {
+            $this->purge_old_actions();
+            $this->wpubasemessages->set_message('wpuactionlogs_purge_old_logs_success', __('Old logs have been purged', 'wpuactionlogs'), 'updated');
+            return;
+        }
     }
 
     /* ----------------------------------------------------------
