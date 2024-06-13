@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.20.0
+Version: 0.20.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.20.0';
+    private $plugin_version = '0.20.1';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -330,14 +330,16 @@ class WPUActionLogs {
 
         /* Filter by user */
         $current_user = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'user_id' && is_numeric($_GET['filter_value']) ? $_GET['filter_value'] : '';
+        $current_user_empty = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'user_id' && $_GET['filter_value'] == '';
         $table = $this->plugin_settings['id'];
         global $wpdb;
         $users = $wpdb->get_col("SELECT DISTINCT user_id FROM {$wpdb->prefix}{$table} WHERE user_id != ''");
         if ($users) {
-            echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+this.value:this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
-            echo '<option ' . ($current_user == '' ? 'selected' : '') . ' value="">' . __('All', 'wpuactionlogs') . '</option>';
+            echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
+            echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . __('All', 'wpuactionlogs') . '</option>';
+            echo '<option ' . ($current_user_empty ? 'selected' : '') . ' value="-">' . __('None', 'wpuactionlogs') . '</option>';
             foreach ($users as $usr_id) {
-                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . get_the_author_meta('nicename', $usr_id) . '</option>';
+                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . esc_html(get_the_author_meta('display_name', $usr_id)) . '</option>';
             }
             echo '</select></p>';
         }
