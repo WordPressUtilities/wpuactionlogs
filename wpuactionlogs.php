@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.20.1
+Version: 0.20.2
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.20.1';
+    private $plugin_version = '0.20.2';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -333,13 +333,20 @@ class WPUActionLogs {
         $current_user_empty = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'user_id' && $_GET['filter_value'] == '';
         $table = $this->plugin_settings['id'];
         global $wpdb;
-        $users = $wpdb->get_col("SELECT DISTINCT user_id FROM {$wpdb->prefix}{$table} WHERE user_id != ''");
+        $q = "SELECT DISTINCT user_id, display_name FROM {$wpdb->prefix}{$table}  LEFT JOIN {$wpdb->users} ON user_id = {$wpdb->users}.ID   WHERE user_id != '' ORDER BY display_name ASC";
+        $users = $wpdb->get_results($q);
+
         if ($users) {
+            $users_with_name = array();
+            foreach ($users as $usr) {
+                $users_with_name[$usr->user_id] = $usr->display_name . ' (#' . $usr->user_id . ')';
+            }
+
             echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
             echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . __('All', 'wpuactionlogs') . '</option>';
             echo '<option ' . ($current_user_empty ? 'selected' : '') . ' value="-">' . __('None', 'wpuactionlogs') . '</option>';
-            foreach ($users as $usr_id) {
-                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . esc_html(get_the_author_meta('display_name', $usr_id)) . '</option>';
+            foreach ($users_with_name as $usr_id => $user_name) {
+                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . esc_html($user_name) . '</option>';
             }
             echo '</select></p>';
         }
@@ -372,7 +379,7 @@ class WPUActionLogs {
             $user_id = $cellcontent;
             $user = get_user_by('id', $user_id);
             if ($user) {
-                $login = '<a href="' . esc_url($filter_url) . '">' . esc_html($user->user_login) . '</a>';
+                $login = '<a href="' . esc_url($filter_url) . '">' . esc_html($user->display_name) . '</a>';
                 $cellcontent = '<img loading="lazy" style="height:16px;width:16px;vertical-align:middle;margin-right:0.3em" src="' . esc_url(get_avatar_url($user->ID, array('size' => 16))) . '" />';
                 $cellcontent .= '<strong style="vertical-align:middle">' . $login . '</strong>';
             }
