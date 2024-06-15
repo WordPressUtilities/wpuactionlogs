@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.20.2
+Version: 0.21.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.20.2';
+    private $plugin_version = '0.21.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -64,6 +64,9 @@ class WPUActionLogs {
         add_action('admin_init', array(&$this,
             'log_current_user_action'
         ));
+        add_action('admin_enqueue_scripts', array(&$this,
+            'admin_enqueue_scripts'
+        ));
 
         add_action('wp_dashboard_setup', function () {
             if (!$this->can_view_active_users()) {
@@ -95,6 +98,11 @@ class WPUActionLogs {
             load_muplugin_textdomain('wpuactionlogs', $lang_dir);
         }
         $this->plugin_description = __('Useful logs about what’s happening on your website admin.', 'wpuactionlogs');
+    }
+
+    # ASSETS
+    function admin_enqueue_scripts() {
+        wp_enqueue_style('wpuactionlogs-style', plugins_url('assets/admin.css', __FILE__), array(), $this->plugin_version);
     }
 
     # ADMIN PAGES
@@ -352,9 +360,10 @@ class WPUActionLogs {
         }
 
         $array_values = false; // ($array_values are automatically retrieved if not a valid array)
-        echo $this->baseadmindatas->get_admin_table(
+        echo $this->baseadmindatas->get_admin_view(
             $array_values,
             array(
+                'is_admin_view' => true,
                 'perpage' => 50,
                 'columns' => array(
                     'id' => __('ID', 'wpuactionlogs'),
@@ -380,7 +389,7 @@ class WPUActionLogs {
             $user = get_user_by('id', $user_id);
             if ($user) {
                 $login = '<a href="' . esc_url($filter_url) . '">' . esc_html($user->display_name) . '</a>';
-                $cellcontent = '<img loading="lazy" style="height:16px;width:16px;vertical-align:middle;margin-right:0.3em" src="' . esc_url(get_avatar_url($user->ID, array('size' => 16))) . '" />';
+                $cellcontent = '<img loading="lazy" class="wpuactionlogs-cell-avatar" src="' . esc_url(get_avatar_url($user->ID, array('size' => 16))) . '" />';
                 $cellcontent .= '<strong style="vertical-align:middle">' . $login . '</strong>';
             }
         }
@@ -427,13 +436,13 @@ class WPUActionLogs {
                 }
 
                 /* Cells */
-                $cellcontent .= '<ul style="margin:0;overflow:hidden;">';
+                $cellcontent .= '<ul class="wpuactionlogs-cell-list">';
                 foreach ($data as $key => $var) {
                     $var_display = $var;
                     if (is_array($var_display) && isset($var_display[0])) {
                         $var_display = implode(', ', $var_display);
                     }
-                    $cellcontent .= '<li style="margin:0"><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
+                    $cellcontent .= '<li><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
                 }
                 $cellcontent .= '</ul>';
 
@@ -890,7 +899,7 @@ class WPUActionLogs {
                 $avatars_html .= ' &hellip;';
                 break;
             }
-            $avatars_html .= '<img loading="lazy" src="' . $active_user['avatar'] . '" alt="' . esc_attr($active_user['name']) . '" title="' . esc_attr($active_user['name']) . '" style="height:1em;width:1em;margin-left:0.3em;vertical-align: middle;border-radius: 99em;" />';
+            $avatars_html .= '<img loading="lazy" class="wpuactionlogs-active-avatar" src="' . $active_user['avatar'] . '" alt="' . esc_attr($active_user['name']) . '" title="' . esc_attr($active_user['name']) . '" />';
         }
 
         global $wp_admin_bar;
@@ -901,7 +910,7 @@ class WPUActionLogs {
         ];
         $wp_admin_bar->add_node($args);
         foreach ($active_users as $user) {
-            $title_html = '<img loading="lazy" src="' . $user['avatar'] . '" alt="" title="' . esc_attr($user['name']) . '" style="height:1em;width:1em;margin-right:0.3em;vertical-align: middle;border-radius: 99em;" />';
+            $title_html = '<img loading="lazy" src="' . $user['avatar'] . '" alt="" title="' . esc_attr($user['name']) . '" class="wpuactionlogs-active-avatar" />';
             $title_html .= $user['name'] . ($user['id'] == get_current_user_id() ? ' ' . __('(you)', 'wpuactionlogs') : '');
             $wp_admin_bar->add_node([
                 'id' => $menu_id . '-' . $user['id'],

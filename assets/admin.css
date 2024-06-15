@@ -1,0 +1,36 @@
+@charset "UTF-8";
+
+/* ----------------------------------------------------------
+  Lists
+---------------------------------------------------------- */
+
+.wpuactionlogs-cell-list {
+    margin: 0;
+    overflow: hidden;
+}
+
+.wpuactionlogs-cell-list li {
+    margin: 0;
+}
+
+/* ----------------------------------------------------------
+  Avatars
+---------------------------------------------------------- */
+
+.wpuactionlogs-cell-avatar,
+.wpuactionlogs-active-avatar {
+    border-radius: 99em;
+    vertical-align: middle;
+}
+
+.wpuactionlogs-cell-avatar {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.3em;
+}
+
+.wpuactionlogs-active-avatar {
+    width: 1em;
+    height: 1em;
+    margin-left: 0.3em;
+}
