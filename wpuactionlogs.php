@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.21.1
+Version: 0.22.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.21.1';
+    private $plugin_version = '0.22.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -92,7 +92,7 @@ class WPUActionLogs {
     ---------------------------------------------------------- */
 
     # TRANSLATION
-    function load_translation() {
+    public function load_translation() {
         $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
         if (!load_plugin_textdomain('wpuactionlogs', false, $lang_dir)) {
             load_muplugin_textdomain('wpuactionlogs', $lang_dir);
@@ -101,7 +101,7 @@ class WPUActionLogs {
     }
 
     # ASSETS
-    function admin_enqueue_scripts() {
+    public function admin_enqueue_scripts() {
         wp_enqueue_style('wpuactionlogs-style', plugins_url('assets/admin.css', __FILE__), array(), $this->plugin_version);
     }
 
@@ -153,7 +153,7 @@ class WPUActionLogs {
         $this->adminpages->init($pages_options, $admin_pages);
     }
 
-    function load_update() {
+    public function load_update() {
         require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpuactionlogs\WPUBaseUpdate(
             'WordPressUtilities',
@@ -301,12 +301,12 @@ class WPUActionLogs {
         $this->settings_obj = new \wpuactionlogs\WPUBaseSettings($this->settings_details, $this->settings);
     }
 
-    function load_messages() {
+    public function load_messages() {
         require_once __DIR__ . '/inc/WPUBaseMessages/WPUBaseMessages.php';
         $this->wpubasemessages = new \wpuactionlogs\WPUBaseMessages($this->plugin_settings['id']);
     }
 
-    function get_call_stack() {
+    public function get_call_stack() {
         $backtrace = debug_backtrace();
         $files = array();
         foreach ($backtrace as $trace) {
@@ -341,6 +341,8 @@ class WPUActionLogs {
         $current_user_empty = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'user_id' && $_GET['filter_value'] == '';
         $table = $this->plugin_settings['id'];
         global $wpdb;
+
+        /* USERS */
         $q = "SELECT DISTINCT user_id, display_name FROM {$wpdb->prefix}{$table}  LEFT JOIN {$wpdb->users} ON user_id = {$wpdb->users}.ID   WHERE user_id != '' ORDER BY display_name ASC";
         $users = $wpdb->get_results($q);
 
@@ -350,11 +352,27 @@ class WPUActionLogs {
                 $users_with_name[$usr->user_id] = $usr->display_name . ' (#' . $usr->user_id . ')';
             }
 
-            echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
-            echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . __('All', 'wpuactionlogs') . '</option>';
+            echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
+            echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . __('All values', 'wpuactionlogs') . '</option>';
             echo '<option ' . ($current_user_empty ? 'selected' : '') . ' value="-">' . __('None', 'wpuactionlogs') . '</option>';
             foreach ($users_with_name as $usr_id => $user_name) {
                 echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . esc_html($user_name) . '</option>';
+            }
+            echo '</select></p>';
+        }
+
+        /* INTERFACES */
+        $q = "SELECT DISTINCT action_interface FROM {$wpdb->prefix}{$table} WHERE action_interface != '' ORDER BY action_interface ASC";
+        $interfaces = $wpdb->get_results($q);
+        $current_interface = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'action_interface' ? $_GET['filter_value'] : '';
+        if ($interfaces) {
+            $interfaces = array_map(function ($a) {
+                return $a->action_interface;
+            }, $interfaces);
+            echo '<p><label for="wpuactionlogs_select_interface">' . __('Select an interface: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_interface" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=action_interface&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="action_interface" id="action_interface">';
+            echo '<option value="">' . __('All values', 'wpuactionlogs') . '</option>';
+            foreach ($interfaces as $interface) {
+                echo '<option ' . ($current_interface == $interface ? 'selected' : '') . ' value="' . $interface . '">' . esc_html($interface) . '</option>';
             }
             echo '</select></p>';
         }
@@ -376,7 +394,7 @@ class WPUActionLogs {
         );
     }
 
-    function wpubaseadmindatas_cellcontent($cellcontent, $cell_id, $settings) {
+    public function wpubaseadmindatas_cellcontent($cellcontent, $cell_id, $settings) {
         $admin_url = admin_url('admin.php?page=' . $this->admin_page_id);
         $filter_url = $admin_url . '&' . http_build_query(array(
             'filter_key' => $cell_id,
@@ -462,12 +480,12 @@ class WPUActionLogs {
         Actions
     ---------------------------------------------------------- */
 
-    function page_content__actions() {
+    public function page_content__actions() {
         submit_button(__('Purge old logs', 'wpuactionlogs'), 'primary', 'purge_old_logs');
         submit_button(__('Delete all logs', 'wpuactionlogs'), 'secondary', 'delete_old_logs');
     }
 
-    function page_action__actions() {
+    public function page_action__actions() {
 
         if (!isset($_POST['purge_old_logs']) && !isset($_POST['delete_old_logs'])) {
             return;
@@ -490,7 +508,7 @@ class WPUActionLogs {
       Admin widget
     ---------------------------------------------------------- */
 
-    function dashboard_widget_content() {
+    public function dashboard_widget_content() {
         $active_users = $this->get_active_users();
         if (!$active_users) {
             echo '<p>' . __('No active users', 'wpuactionlogs') . '</p>';
@@ -507,7 +525,7 @@ class WPUActionLogs {
       Log
     ---------------------------------------------------------- */
 
-    function log_line($args, $extra = array()) {
+    public function log_line($args, $extra = array()) {
 
         if (!is_array($args)) {
             $args = array(
@@ -627,7 +645,7 @@ class WPUActionLogs {
         }
     }
 
-    function action__posts($post_id) {
+    public function action__posts($post_id) {
         if (wp_is_post_revision($post_id)) {
             return;
         }
@@ -660,7 +678,7 @@ class WPUActionLogs {
         $this->log_line($args);
     }
 
-    function action__terms($term_id, $tt_id, $taxonomy, $old_term = false) {
+    public function action__terms($term_id, $tt_id, $taxonomy, $old_term = false) {
         if ($this->settings_obj->get_setting('action__terms') != '1') {
             return;
         }
@@ -684,7 +702,7 @@ class WPUActionLogs {
         $this->log_line($args);
     }
 
-    function action__options($option_name) {
+    public function action__options($option_name) {
         if ($this->settings_obj->get_setting('action__options') != '1') {
             return;
         }
@@ -735,7 +753,7 @@ class WPUActionLogs {
         ));
     }
 
-    function action__mails($args) {
+    public function action__mails($args) {
         if ($this->settings_obj->get_setting('action__mails') == '1') {
             $this->log_line(array(
                 'to' => $args['to'],
@@ -746,13 +764,13 @@ class WPUActionLogs {
         return $args;
     }
 
-    function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
+    public function action__wp_update_nav_menu($menu_id, $menu_data = array()) {
         if ($this->settings_obj->get_setting('action__wp_update_nav_menu') == '1' && $menu_data) {
             $this->log_line($menu_data);
         }
     }
 
-    function action__users($user_id, $userdata = array()) {
+    public function action__users($user_id, $userdata = array()) {
         $settings = array();
         $current_action = current_action();
         if (!$this->settings_obj->get_setting('action__users') == '1') {
@@ -786,7 +804,7 @@ class WPUActionLogs {
         }
     }
 
-    function action__plugins($plugin) {
+    public function action__plugins($plugin) {
         $settings = array();
         $current_action = current_action();
         if (!$this->settings_obj->get_setting('action__plugins') == '1') {
@@ -847,7 +865,7 @@ class WPUActionLogs {
       Extras
     ---------------------------------------------------------- */
 
-    function can_view_active_users() {
+    public function can_view_active_users() {
         if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
             return false;
         }
@@ -857,7 +875,7 @@ class WPUActionLogs {
         return true;
     }
 
-    function log_current_user_action() {
+    public function log_current_user_action() {
         if ($this->settings_obj->get_setting('extras__display_active_users') != '1') {
             return;
         }
@@ -875,7 +893,7 @@ class WPUActionLogs {
         set_transient($this->plugin_settings['transient_action_prefix'] . $current_user->ID, $current_page, 60);
     }
 
-    function admin_bar_menu_display_active_users() {
+    public function admin_bar_menu_display_active_users() {
         if (!$this->can_view_active_users()) {
             return;
         }
@@ -918,7 +936,7 @@ class WPUActionLogs {
         }
     }
 
-    function get_current_page() {
+    public function get_current_page() {
 
         /* Retrieve URI */
         $current_page = esc_url($_SERVER['REQUEST_URI']);
@@ -957,7 +975,7 @@ class WPUActionLogs {
         return $current_page;
     }
 
-    function get_active_users() {
+    public function get_active_users() {
         global $wpdb;
         $users_with_transient = [];
         $q = "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_{$this->plugin_settings['transient_action_prefix']}%'";
@@ -973,7 +991,7 @@ class WPUActionLogs {
         ));
     }
 
-    function get_others_active_users_on_this_page() {
+    public function get_others_active_users_on_this_page() {
 
         $users = $this->get_active_users();
 
@@ -999,7 +1017,7 @@ class WPUActionLogs {
       Helpers
     ---------------------------------------------------------- */
 
-    function strip_tags_content($string) {
+    public function strip_tags_content($string) {
         // Remove script and style contents
         $string = preg_replace(array(
             '#<script[^>]*?>(.*)</script>#siU',
@@ -1021,7 +1039,7 @@ class WPUActionLogs {
         return implode("\n", $lines);
     }
 
-    function text_truncate($string, $length = 150, $more = '...') {
+    public function text_truncate($string, $length = 150, $more = '...') {
         $_new_string = '';
         $string = strip_tags($string);
         $_maxlen = $length - strlen($more);
