@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.23.0
+Version: 0.23.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.23.0';
+    private $plugin_version = '0.23.1';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -349,7 +349,7 @@ class WPUActionLogs {
         $q = "SELECT DISTINCT user_id, display_name FROM {$wpdb->prefix}{$table}  LEFT JOIN {$wpdb->users} ON user_id = {$wpdb->users}.ID   WHERE user_id != '' ORDER BY display_name ASC";
         $users = $wpdb->get_results($q);
 
-        if ($users) {
+        if ($users && count($users) > 1) {
             $users_with_name = array();
             foreach ($users as $usr) {
                 $users_with_name[$usr->user_id] = $usr->display_name . ' (#' . $usr->user_id . ')';
@@ -368,7 +368,7 @@ class WPUActionLogs {
         $q = "SELECT DISTINCT action_interface FROM {$wpdb->prefix}{$table} WHERE action_interface != '' ORDER BY action_interface ASC";
         $interfaces = $wpdb->get_results($q);
         $current_interface = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'action_interface' ? $_GET['filter_value'] : '';
-        if ($interfaces) {
+        if ($interfaces && count($interfaces) > 1) {
             $interfaces = array_map(function ($a) {
                 return $a->action_interface;
             }, $interfaces);
