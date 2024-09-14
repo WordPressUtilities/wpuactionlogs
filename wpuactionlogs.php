@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.23.1
+Version: 0.24.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.23.1';
+    private $plugin_version = '0.24.0';
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -44,13 +44,13 @@ class WPUActionLogs {
             'load_update'
         ));
         add_filter('plugins_loaded', array(&$this,
-            'load_admin_page'
-        ));
-        add_filter('plugins_loaded', array(&$this,
             'load_custom_table'
         ));
         add_filter('plugins_loaded', array(&$this,
             'load_settings'
+        ));
+        add_filter('plugins_loaded', array(&$this,
+            'load_admin_page'
         ));
         add_filter('plugins_loaded', array(&$this,
             'load_messages'
@@ -146,6 +146,17 @@ class WPUActionLogs {
                 )
             )
         );
+        if ($this->settings_obj->get_setting('extras__display_active_users') == '1' && $this->can_view_active_users()) {
+            $admin_pages['active_users'] = array(
+                'parent' => 'main',
+                'name' => __('Active users', 'wpuactionlogs'),
+                'settings_link' => false,
+                'has_form' => false,
+                'function_content' => array(&$this,
+                    'page_content__active_users'
+                )
+            );
+        }
         $pages_options = array(
             'id' => $this->plugin_settings['id'],
             'level' => 'manage_options',
@@ -505,6 +516,27 @@ class WPUActionLogs {
             $this->wpubasemessages->set_message('wpuactionlogs_purge_old_logs_success', __('Old logs have been purged', 'wpuactionlogs'), 'updated');
             return;
         }
+    }
+
+    /* ----------------------------------------------------------
+      Active users
+    ---------------------------------------------------------- */
+
+    public function page_content__active_users() {
+        $active_users = $this->get_active_users('pages');
+        if (!$active_users) {
+            echo '<p>' . __('No active users', 'wpuactionlogs') . '</p>';
+            return;
+        }
+        echo '<ul>';
+        foreach ($active_users as $user_page) {
+            $user_id = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $user_page);
+            $transient_key = str_replace('_transient_', '', $user_page);
+            $user_page_val = get_transient($transient_key);
+            $user = get_user_by('id', $user_id);
+            echo '<li>' . $user->display_name . ' • ' . $user_page_val . '</li>';
+        }
+        echo '</ul>';
     }
 
     /* ----------------------------------------------------------
@@ -979,13 +1011,18 @@ class WPUActionLogs {
         return $current_page;
     }
 
-    public function get_active_users() {
+    public function get_active_users($type = 'users') {
         global $wpdb;
         $users_with_transient = [];
+        $users_pages = [];
         $q = "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_{$this->plugin_settings['transient_action_prefix']}%'";
         $results = $wpdb->get_results($q);
         foreach ($results as $result) {
             $users_with_transient[] = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $result->option_name);
+            $users_pages[] = $result->option_name;
+        }
+        if ($type == 'pages') {
+            return $users_pages;
         }
         if (!$users_with_transient) {
             return array();

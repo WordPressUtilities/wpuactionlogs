@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2024-08-05 19:06+0200\n"
+"POT-Creation-Date: 2024-09-14 18:58+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -12,13 +12,13 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_x\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.5\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminPage\n"
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseUpdate\n"
 
 #: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:587
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:823
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:825
 msgid "New Post"
 msgstr "Nouvel article"
 
@@ -40,60 +40,60 @@ msgstr "Oui"
 msgid "Submit"
 msgstr "Envoyer"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:784
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:785
 #, php-format
 msgid "Items %s - %s"
 msgstr "Articles %s - %s"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:798
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:800
 #, php-format
 msgid "<strong>Filter :</strong> %s • <strong>Value :</strong> %s"
 msgstr "<strong>Filtre:</strong> %s • <strong>Valeur :</strong> %s"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:799
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:801
 msgid "Reset"
 msgstr "Réinitialiser"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:809
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:811
 msgid "Search"
 msgstr "Rechercher"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:811
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:813
 msgid "Clear"
 msgstr "Vider"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:870
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:872
 msgid "Show more details"
 msgstr "Afficher plus de détails"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:876
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:878
 msgid "Edit"
 msgstr "Modifier"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:876
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:878
 msgid "View"
 msgstr "Voir"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:884
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:886
 msgid "Delete"
 msgstr "Supprimer"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:886
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:888
 msgid "Delete filtered lines"
 msgstr "Supprimer les lignes filtrées"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:897
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:899
 msgid "Export all"
 msgstr "Tout exporter"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:899
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:901
 msgid "Export filtered view"
 msgstr "Exporter la vue filtrée"
 
 #: inc/WPUBaseSettings/WPUBaseSettings.php:132
 #: inc/WPUBaseSettings/WPUBaseSettings.php:615
-#: inc/WPUBaseSettings/WPUBaseSettings.php:622 wpuactionlogs.php:125
-#: wpuactionlogs.php:127
+#: inc/WPUBaseSettings/WPUBaseSettings.php:622 wpuactionlogs.php:128
+#: wpuactionlogs.php:130
 msgid "Settings"
 msgstr "Réglages"
 
@@ -121,118 +121,122 @@ msgstr "Langue"
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: wpuactionlogs.php:77
+#: wpuactionlogs.php:80
 msgid "Currently online"
 msgstr "Actuellement en ligne"
 
-#: wpuactionlogs.php:100
+#: wpuactionlogs.php:103
 msgid "Useful logs about what’s happening on your website admin."
 msgstr ""
 "Des logs utiles sur ce qui se passe dans l’administration de votre site Web."
 
-#: wpuactionlogs.php:135 wpuactionlogs.php:212
+#: wpuactionlogs.php:138 wpuactionlogs.php:226
 msgid "Actions"
 msgstr "Actions"
 
-#: wpuactionlogs.php:176
+#: wpuactionlogs.php:152
+msgid "Active users"
+msgstr "Utilisateurs actifs"
+
+#: wpuactionlogs.php:190
 msgid "User ID"
 msgstr "ID de l’utilisateur"
 
-#: wpuactionlogs.php:180 wpuactionlogs.php:388
+#: wpuactionlogs.php:194 wpuactionlogs.php:402
 msgid "Action type"
 msgstr "Type d’action"
 
-#: wpuactionlogs.php:184 wpuactionlogs.php:390
+#: wpuactionlogs.php:198 wpuactionlogs.php:404
 msgid "Action detail"
 msgstr "Détails de l’action"
 
-#: wpuactionlogs.php:189 wpuactionlogs.php:389
+#: wpuactionlogs.php:203 wpuactionlogs.php:403
 msgid "Action source"
 msgstr "Source de l’action"
 
-#: wpuactionlogs.php:193 wpuactionlogs.php:391
+#: wpuactionlogs.php:207 wpuactionlogs.php:405
 msgid "Action interface"
 msgstr "Interface"
 
-#: wpuactionlogs.php:216
+#: wpuactionlogs.php:230
 msgid "Interfaces"
 msgstr "Interfaces"
 
-#: wpuactionlogs.php:220
+#: wpuactionlogs.php:234
 msgid "Extras"
 msgstr "Extras"
 
-#: wpuactionlogs.php:225
+#: wpuactionlogs.php:239
 #, php-format
 msgid "Enable logs for “%s”"
 msgstr "Activer les journaux pour les « %s »"
 
-#: wpuactionlogs.php:226
+#: wpuactionlogs.php:240
 #, php-format
 msgid "Disable logs on %s"
 msgstr "Désactiver les journaux pour %s"
 
-#: wpuactionlogs.php:229 wpuactionlogs.php:230
+#: wpuactionlogs.php:243 wpuactionlogs.php:244
 msgid "Posts"
 msgstr "Publications"
 
-#: wpuactionlogs.php:235 wpuactionlogs.php:236
+#: wpuactionlogs.php:249 wpuactionlogs.php:250
 msgid "Menus"
 msgstr "Menus"
 
-#: wpuactionlogs.php:241 wpuactionlogs.php:242
+#: wpuactionlogs.php:255 wpuactionlogs.php:256
 msgid "Terms"
 msgstr "Termes"
 
-#: wpuactionlogs.php:247 wpuactionlogs.php:248
+#: wpuactionlogs.php:261 wpuactionlogs.php:262
 msgid "Options"
 msgstr "Options"
 
-#: wpuactionlogs.php:253 wpuactionlogs.php:254
+#: wpuactionlogs.php:267 wpuactionlogs.php:268
 msgid "Emails"
 msgstr "Emails"
 
-#: wpuactionlogs.php:259 wpuactionlogs.php:260
+#: wpuactionlogs.php:273 wpuactionlogs.php:274
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: wpuactionlogs.php:265 wpuactionlogs.php:266
+#: wpuactionlogs.php:279 wpuactionlogs.php:280
 msgid "Plugins"
 msgstr "Extensions"
 
-#: wpuactionlogs.php:271
+#: wpuactionlogs.php:285
 msgid "Disable on web"
 msgstr "Désactiver sur web"
 
-#: wpuactionlogs.php:272
+#: wpuactionlogs.php:286
 msgid "web interface"
 msgstr "l’interface web"
 
-#: wpuactionlogs.php:277
+#: wpuactionlogs.php:291
 msgid "Disable on cron"
 msgstr "Désactiver sur cron"
 
-#: wpuactionlogs.php:278
+#: wpuactionlogs.php:292
 msgid "cron interface"
 msgstr "l’interface cron"
 
-#: wpuactionlogs.php:283
+#: wpuactionlogs.php:297
 msgid "Disable on CLI"
 msgstr "Désactiver sur CLI"
 
-#: wpuactionlogs.php:284
+#: wpuactionlogs.php:298
 msgid "CLI interface"
 msgstr "l’interface CLI"
 
-#: wpuactionlogs.php:289
+#: wpuactionlogs.php:303
 msgid "Display active users"
 msgstr "Afficher les utilisateurs actifs"
 
-#: wpuactionlogs.php:294
+#: wpuactionlogs.php:308
 msgid "Purge after N days"
 msgstr "Purger après N jours"
 
-#: wpuactionlogs.php:295
+#: wpuactionlogs.php:309
 msgid ""
 "Logs will be automatically deleted after this number of days. Set to 0 to "
 "disable"
@@ -240,63 +244,63 @@ msgstr ""
 "Les logs seront automatiquement supprimés après ce nombre de jours. Définir "
 "à 0 pour désactiver"
 
-#: wpuactionlogs.php:355
+#: wpuactionlogs.php:369
 msgid "Select an user: "
 msgstr "Sélectionnez un utilisateur : "
 
-#: wpuactionlogs.php:356 wpuactionlogs.php:373
+#: wpuactionlogs.php:370 wpuactionlogs.php:387
 msgid "All values"
 msgstr "Toutes les valeurs"
 
-#: wpuactionlogs.php:357
+#: wpuactionlogs.php:371
 msgid "None"
 msgstr "Aucun"
 
-#: wpuactionlogs.php:372
+#: wpuactionlogs.php:386
 msgid "Select an interface: "
 msgstr "Sélectionnez une interface : "
 
-#: wpuactionlogs.php:385
+#: wpuactionlogs.php:399
 msgid "ID"
 msgstr "ID"
 
-#: wpuactionlogs.php:386
+#: wpuactionlogs.php:400
 msgid "Date"
 msgstr "Date"
 
-#: wpuactionlogs.php:387
+#: wpuactionlogs.php:401
 msgid "Account"
 msgstr "Compte"
 
-#: wpuactionlogs.php:475
+#: wpuactionlogs.php:489
 msgid "Save Changes"
 msgstr "Sauvegarder"
 
-#: wpuactionlogs.php:484
+#: wpuactionlogs.php:498
 msgid "Purge old logs"
 msgstr "Purger les vieux journaux"
 
-#: wpuactionlogs.php:485
+#: wpuactionlogs.php:499
 msgid "Delete all logs"
 msgstr "Supprimer tous les journaux"
 
-#: wpuactionlogs.php:497
+#: wpuactionlogs.php:511
 msgid "All logs have been deleted"
 msgstr "Tous les journaux ont été supprimés"
 
-#: wpuactionlogs.php:502
+#: wpuactionlogs.php:516
 msgid "Old logs have been purged"
 msgstr "Les vieux journaux ont été purgés"
 
-#: wpuactionlogs.php:514
+#: wpuactionlogs.php:528 wpuactionlogs.php:549
 msgid "No active users"
 msgstr "Aucun utilisateur actif"
 
-#: wpuactionlogs.php:925
+#: wpuactionlogs.php:961
 msgid "Online here:"
 msgstr "En ligne ici :"
 
-#: wpuactionlogs.php:930
+#: wpuactionlogs.php:966
 msgid "(you)"
 msgstr "(vous)"
 
