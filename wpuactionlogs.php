@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.24.0
+Version: 0.25.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,8 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.24.0';
+    private $plugin_version = '0.25.0';
+    private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
         'name' => 'WPU Action Logs',
@@ -419,7 +420,9 @@ class WPUActionLogs {
             $user = get_user_by('id', $user_id);
             if ($user) {
                 $login = '<a href="' . esc_url($filter_url) . '">' . esc_html($user->display_name) . '</a>';
-                $cellcontent = '<img loading="lazy" class="wpuactionlogs-cell-avatar" src="' . esc_url(get_avatar_url($user->ID, array('size' => 16))) . '" />';
+                $cellcontent = get_avatar($user->ID, 16, '', '', array(
+                    'class' => 'wpuactionlogs-cell-avatar'
+                ));
                 $cellcontent .= '<strong style="vertical-align:middle">' . $login . '</strong>';
             }
         }
@@ -529,12 +532,15 @@ class WPUActionLogs {
             return;
         }
         echo '<ul>';
-        foreach ($active_users as $user_page) {
-            $user_id = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $user_page);
-            $transient_key = str_replace('_transient_', '', $user_page);
-            $user_page_val = get_transient($transient_key);
+        foreach ($active_users as $user_transient) {
+            $user_id = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $user_transient);
+            $transient_key = str_replace('_transient_', '', $user_transient);
             $user = get_user_by('id', $user_id);
-            echo '<li>' . $user->display_name . ' • ' . $user_page_val . '</li>';
+            $expires = (int) get_option('_transient_timeout_' . $transient_key, 0);
+            $time_diff = human_time_diff($expires - $this->transient_active_duration, time());
+            echo '<li>' . get_avatar($user_id, 16, '', '', array(
+                'class' => 'wpuactionlogs-avatar'
+            )) . ' ' . $user->display_name . ' • ' . htmlentities(urldecode(get_transient($transient_key))) . ' - ' . sprintf(__('%s ago', 'wpuactionlogs'), $time_diff) . '</li>';
         }
         echo '</ul>';
     }
@@ -926,7 +932,7 @@ class WPUActionLogs {
         }
 
         $current_user = wp_get_current_user();
-        set_transient($this->plugin_settings['transient_action_prefix'] . $current_user->ID, $current_page, 60);
+        set_transient($this->plugin_settings['transient_action_prefix'] . $current_user->ID, $current_page, $this->transient_active_duration);
     }
 
     public function admin_bar_menu_display_active_users() {
@@ -939,8 +945,16 @@ class WPUActionLogs {
             return;
         }
 
+        /* Do not track some pages */
+        $excluded_pages = array(
+            '/wp-admin/profile.php'
+        );
+        if (in_array($current_page, $excluded_pages)) {
+            return false;
+        }
+
         $active_users = $this->get_others_active_users_on_this_page();
-        if (!$active_users || count($active_users) < 2) {
+        if (!$active_users || count($active_users) < 1) {
             return;
         }
 
@@ -951,7 +965,9 @@ class WPUActionLogs {
                 $avatars_html .= ' &hellip;';
                 break;
             }
-            $avatars_html .= '<img loading="lazy" class="wpuactionlogs-active-avatar" src="' . $active_user['avatar'] . '" alt="' . esc_attr($active_user['name']) . '" title="' . esc_attr($active_user['name']) . '" />';
+            $avatars_html .= get_avatar($active_user['id'], 16, '', '', array(
+                'class' => 'wpuactionlogs-active-avatar'
+            ));
         }
 
         global $wp_admin_bar;
@@ -962,7 +978,9 @@ class WPUActionLogs {
         ];
         $wp_admin_bar->add_node($args);
         foreach ($active_users as $user) {
-            $title_html = '<img loading="lazy" src="' . $user['avatar'] . '" alt="" title="' . esc_attr($user['name']) . '" class="wpuactionlogs-active-avatar" />';
+            $title_html = get_avatar($user['id'], 16, '', '', array(
+                'class' => 'wpuactionlogs-active-avatar'
+            ));
             $title_html .= $user['name'] . ($user['id'] == get_current_user_id() ? ' ' . __('(you)', 'wpuactionlogs') : '');
             $wp_admin_bar->add_node([
                 'id' => $menu_id . '-' . $user['id'],
@@ -990,14 +1008,6 @@ class WPUActionLogs {
         );
         foreach ($excluded_args as $excluded_arg) {
             $current_page = remove_query_arg($excluded_arg, $current_page);
-        }
-
-        /* Do not track some pages */
-        $excluded_pages = array(
-            '/wp-admin/profile.php'
-        );
-        if (in_array($current_page, $excluded_pages)) {
-            return false;
         }
 
         /* Ignore some URL parts */
@@ -1046,8 +1056,7 @@ class WPUActionLogs {
                 $active_users[] = [
                     'id' => $user->ID,
                     'name' => $user->display_name,
-                    'last_page' => $last_page,
-                    'avatar' => get_avatar_url($user->ID, ['size' => 16])
+                    'last_page' => $last_page
                 ];
             }
         }

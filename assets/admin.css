@@ -18,7 +18,7 @@
 ---------------------------------------------------------- */
 
 .wpuactionlogs-cell-avatar,
-.wpuactionlogs-active-avatar {
+#wpadminbar .wpuactionlogs-active-avatar {
     border-radius: 99em;
     vertical-align: middle;
 }
@@ -29,8 +29,12 @@
     margin-right: 0.3em;
 }
 
-.wpuactionlogs-active-avatar {
+#wpadminbar .wpuactionlogs-active-avatar {
     width: 1em;
     height: 1em;
-    margin-left: 0.3em;
+    margin: 0 0 0 0.3em;
+}
+
+#wpadminbar .ab-sub-wrapper .wpuactionlogs-active-avatar {
+    margin: 0 0.3em 0 0;
 }
