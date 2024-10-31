@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.25.2
+Version: 0.26.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.25.2';
+    private $plugin_version = '0.26.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -457,6 +457,12 @@ class WPUActionLogs {
                     $data['post_id'] = '<a href="' . get_edit_post_link($data['post_id']) . '">' . $data['post_id'] . '</a>';
                 }
 
+                $term_id = false;
+                if (isset($data['term_id'], $data['taxonomy']) && !in_array($data['taxonomy'], array('post_translations')) && is_numeric($data['term_id']) && get_term($data['term_id'])) {
+                    $term_id = $data['term_id'];
+                    $data['term_id'] = '<a href="' . get_edit_term_link($data['term_id'], $data['taxonomy']) . '">' . $data['term_id'] . '</a>';
+                }
+
                 /* Attachments */
                 if ($post_id && isset($data['post_type']) && $data['post_type'] == 'attachment') {
                     $image_html = wp_get_attachment_image($post_id, 'thumbnail', false, array('style' => 'max-width:50px;height:auto;float:left;margin-right:1em;'));
@@ -474,6 +480,9 @@ class WPUActionLogs {
                     $var_display = $var;
                     if (is_array($var_display) && isset($var_display[0])) {
                         $var_display = implode(', ', $var_display);
+                    }
+                    if(is_array($var_display)){
+                        $var_display = json_encode($var_display);
                     }
                     $cellcontent .= '<li><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
                 }
@@ -636,8 +645,11 @@ class WPUActionLogs {
         /* Terms */
         $term_hooks = array(
             'edit_term',
+            'create_category',
+            'edit_category',
             'create_term',
-            'delete_term'
+            'delete_term',
+            'delete_category',
         );
         foreach ($term_hooks as $term_hook) {
             add_action($term_hook, array(&$this,
@@ -726,6 +738,10 @@ class WPUActionLogs {
 
         if ($taxonomy == 'nav_menu') {
             return;
+        }
+
+        if(is_array($taxonomy) && isset($taxonomy['taxonomy'])){
+            $taxonomy = $taxonomy['taxonomy'];
         }
 
         $args = array(
