@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.26.0
+Version: 0.26.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.26.0';
+    private $plugin_version = '0.26.1';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -36,6 +36,10 @@ class WPUActionLogs {
     private $settings_obj;
     private $last_post_id;
     private $admin_page_id = 'wpuactionlogs-main';
+    private $excluded_functions = array(
+        'get_call_stack',
+        'log_line',
+    );
 
     public function __construct() {
         add_filter('plugins_loaded', array(&$this,
@@ -331,6 +335,11 @@ class WPUActionLogs {
             if (strpos($trace['file'], 'wp-content/') === false) {
                 continue;
             }
+            if (strpos($trace['file'], 'plugins/wpuactionlogs') !== false) {
+                if (isset($trace['function']) && in_array($trace['function'], $this->excluded_functions)) {
+                    continue;
+                }
+            }
             preg_match('/wp-content\/([a-z0-9-_]+)\/([a-z0-9-_]+)\//isU', $trace['file'], $matches);
             if (!$matches) {
                 continue;
@@ -338,10 +347,6 @@ class WPUActionLogs {
             $files[] = $matches[1] . '/' . $matches[2];
         }
         $files = array_unique($files);
-
-        if (count($files) > 1 && ($key = array_search('plugins/wpuactionlogs', $files)) !== false) {
-            unset($files[$key]);
-        }
 
         return $files;
 
@@ -481,7 +486,7 @@ class WPUActionLogs {
                     if (is_array($var_display) && isset($var_display[0])) {
                         $var_display = implode(', ', $var_display);
                     }
-                    if(is_array($var_display)){
+                    if (is_array($var_display)) {
                         $var_display = json_encode($var_display);
                     }
                     $cellcontent .= '<li><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
@@ -649,7 +654,7 @@ class WPUActionLogs {
             'edit_category',
             'create_term',
             'delete_term',
-            'delete_category',
+            'delete_category'
         );
         foreach ($term_hooks as $term_hook) {
             add_action($term_hook, array(&$this,
@@ -740,7 +745,7 @@ class WPUActionLogs {
             return;
         }
 
-        if(is_array($taxonomy) && isset($taxonomy['taxonomy'])){
+        if (is_array($taxonomy) && isset($taxonomy['taxonomy'])) {
             $taxonomy = $taxonomy['taxonomy'];
         }
 
