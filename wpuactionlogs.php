@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.26.1
+Version: 0.27.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.26.1';
+    private $plugin_version = '0.27.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -38,32 +38,37 @@ class WPUActionLogs {
     private $admin_page_id = 'wpuactionlogs-main';
     private $excluded_functions = array(
         'get_call_stack',
-        'log_line',
+        'log_line'
+    );
+    private $excluded_post_types_ids = array(
+        'attachment',
+        'auto-draft',
+        'customize_changeset'
     );
 
     public function __construct() {
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_translation'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_update'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_custom_table'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_settings'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_admin_page'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_messages'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_cron'
         ));
-        add_filter('plugins_loaded', array(&$this,
+        add_action('plugins_loaded', array(&$this,
             'load_actions'
         ));
         add_action('admin_init', array(&$this,
@@ -73,7 +78,10 @@ class WPUActionLogs {
             'log_current_user_action'
         ));
         add_action('admin_enqueue_scripts', array(&$this,
-            'admin_enqueue_scripts'
+            'enqueue_styles'
+        ));
+        add_action('wp_enqueue_scripts', array(&$this,
+            'enqueue_styles'
         ));
 
         add_action('wp_dashboard_setup', function () {
@@ -109,7 +117,10 @@ class WPUActionLogs {
     }
 
     # ASSETS
-    public function admin_enqueue_scripts() {
+    public function enqueue_styles() {
+        if (!is_user_logged_in()) {
+            return;
+        }
         wp_enqueue_style('wpuactionlogs-style', plugins_url('assets/admin.css', __FILE__), array(), $this->plugin_version);
     }
 
@@ -457,7 +468,12 @@ class WPUActionLogs {
                 }
                 /* Post ids */
                 $post_id = false;
-                if (isset($data['post_id']) && is_numeric($data['post_id']) && get_post($data['post_id'])) {
+                if (isset($data['post_id'], $data['post_type']) &&
+                    is_numeric($data['post_id']) &&
+                    !in_array($data['post_type'], $this->excluded_post_types_ids) &&
+                    (!isset($data['post_status']) || $data['post_status'] != 'auto-draft') &&
+                    get_post($data['post_id'])
+                ) {
                     $post_id = $data['post_id'];
                     $data['post_id'] = '<a href="' . get_edit_post_link($data['post_id']) . '">' . $data['post_id'] . '</a>';
                 }
