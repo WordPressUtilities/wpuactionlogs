@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.27.0
+Version: 0.28.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.27.0';
+    private $plugin_version = '0.28.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -48,19 +48,7 @@ class WPUActionLogs {
 
     public function __construct() {
         add_action('plugins_loaded', array(&$this,
-            'load_translation'
-        ));
-        add_action('plugins_loaded', array(&$this,
             'load_update'
-        ));
-        add_action('plugins_loaded', array(&$this,
-            'load_custom_table'
-        ));
-        add_action('plugins_loaded', array(&$this,
-            'load_settings'
-        ));
-        add_action('plugins_loaded', array(&$this,
-            'load_admin_page'
         ));
         add_action('plugins_loaded', array(&$this,
             'load_messages'
@@ -68,7 +56,19 @@ class WPUActionLogs {
         add_action('plugins_loaded', array(&$this,
             'load_cron'
         ));
-        add_action('plugins_loaded', array(&$this,
+        add_action('init', array(&$this,
+            'load_translation'
+        ));
+        add_action('init', array(&$this,
+            'load_custom_table'
+        ));
+        add_action('init', array(&$this,
+            'load_settings'
+        ));
+        add_action('init', array(&$this,
+            'load_admin_page'
+        ));
+        add_action('init', array(&$this,
             'load_actions'
         ));
         add_action('admin_init', array(&$this,
@@ -110,8 +110,10 @@ class WPUActionLogs {
     # TRANSLATION
     public function load_translation() {
         $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
-        if (!load_plugin_textdomain('wpuactionlogs', false, $lang_dir)) {
+        if (strpos(__DIR__, 'mu-plugins') !== false) {
             load_muplugin_textdomain('wpuactionlogs', $lang_dir);
+        } else {
+            load_plugin_textdomain('wpuactionlogs', false, $lang_dir);
         }
         $this->plugin_description = __('Useful logs about what’s happening on your website admin.', 'wpuactionlogs');
     }
