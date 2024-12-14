@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.28.0
+Version: 0.29.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.28.0';
+    private $plugin_version = '0.29.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -101,6 +101,15 @@ class WPUActionLogs {
         add_action('wpuactionlogs__cron_hook', array(&$this,
             'wpuactionlogs__callback_function'
         ), 10);
+
+        /* User columns */
+        add_filter('manage_users_columns', array(&$this,
+            'manage_users_columns'
+        ), 10, 1);
+        add_filter('manage_users_custom_column', array(&$this,
+            'manage_users_custom_column'
+        ), 10, 3);
+
     }
 
     /* ----------------------------------------------------------
@@ -1100,6 +1109,30 @@ class WPUActionLogs {
             }
         }
         return $active_users;
+    }
+
+    /* ----------------------------------------------------------
+      Display columns
+    ---------------------------------------------------------- */
+
+    public function manage_users_columns($columns) {
+        if ($this->can_view_active_users()) {
+            $columns['wpuactionlogs_active'] = __('Last action', 'wpuactionlogs');
+        }
+        return $columns;
+    }
+
+    public function manage_users_custom_column($empty, $column_name, $user_id) {
+        if ($column_name == 'wpuactionlogs_active' && $this->can_view_active_users()) {
+            global $wpdb;
+            $table = $this->plugin_settings['id'];
+            $q = $wpdb->prepare("SELECT  * FROM {$wpdb->prefix}{$table} WHERE user_id = %d  ORDER BY creation DESC LIMIT 0,1", $user_id);
+            $users = $wpdb->get_results($q);
+            if ($users && count($users) > 0) {
+                return sprintf(__('%s ago', 'wpuactionlogs'), human_time_diff(strtotime($users[0]->creation), current_time('timestamp')));
+            }
+        }
+        return $empty;
     }
 
     /* ----------------------------------------------------------
