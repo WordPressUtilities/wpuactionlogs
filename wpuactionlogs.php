@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.30.0
+Version: 0.31.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.30.0';
+    private $plugin_version = '0.31.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -335,6 +335,12 @@ class WPUActionLogs {
                 'label' => __('Purge after N days', 'wpuactionlogs'),
                 'help' => __('Logs will be automatically deleted after this number of days. Set to 0 to disable', 'wpuactionlogs'),
                 'type' => 'number',
+                'section' => 'extras'
+            ),
+            'ignored_options' => array(
+                'label' => __('Ignored options', 'wpuactionlogs'),
+                'help' => __('Options that will not be logged : one option_name per line', 'wpuactionlogs'),
+                'type' => 'textarea',
                 'section' => 'extras'
             )
         );
@@ -801,23 +807,48 @@ class WPUActionLogs {
             return;
         }
 
-        /* Excluded names */
-        $excluded_options = apply_filters('wpuactionlogs__action__options__excluded_options', array(
+        $excluded_options = array(
             'cron',
             'action_scheduler_lock_async-request-runner'
-        ));
+        );
 
+        $excluded_options_start = array(
+            'rocket_partial_preload_batch_',
+            '_site_transient',
+            '_transient'
+        );
+
+        $excluded_options_end = array(
+            '_transient_timeout'
+        );
+
+        $ignored_options = $this->settings_obj->get_setting('ignored_options');
+        if ($ignored_options) {
+            $ignored_options = explode("\n", $ignored_options);
+            $ignored_options = array_map('trim', $ignored_options);
+            $ignored_options = array_filter($ignored_options);
+            foreach ($ignored_options as $option_name) {
+                if (substr($option_name, -1) == '*') {
+                    $excluded_options_start[] = substr($option_name, 0, -1);
+                    continue;
+                }
+                if (substr($option_name, 0, 1) == '*') {
+                    $excluded_options_end[] = substr($option_name, 1);
+                    continue;
+                }
+
+                $excluded_options[] = $option_name;
+            }
+        }
+
+        /* Excluded names */
+        $excluded_options = apply_filters('wpuactionlogs__action__options__excluded_options', $excluded_options);
         if (in_array($option_name, $excluded_options)) {
             return;
         }
 
         /* Excluded start */
-        $excluded_options_start = apply_filters('wpuactionlogs__action__options__excluded_options_start', array(
-            'rocket_partial_preload_batch_',
-            '_site_transient',
-            '_transient'
-        ));
-
+        $excluded_options_start = apply_filters('wpuactionlogs__action__options__excluded_options_start', $excluded_options_start);
         foreach ($excluded_options_start as $start) {
             $start_length = strlen($start);
             if (substr($option_name, 0, $start_length) == $start) {
@@ -826,10 +857,7 @@ class WPUActionLogs {
         }
 
         /* Excluded end */
-        $excluded_options_end = apply_filters('wpuactionlogs__action__options__excluded_options_end', array(
-            '__cron_hook_lastexec'
-        ));
-
+        $excluded_options_end = apply_filters('wpuactionlogs__action__options__excluded_options_end', $excluded_options_end);
         foreach ($excluded_options_end as $end) {
             $end_length = strlen($end);
             if (substr($option_name, 0 - $end_length) == $end) {
