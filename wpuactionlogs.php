@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.31.0
+Version: 0.32.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.31.0';
+    private $plugin_version = '0.32.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -209,6 +209,7 @@ class WPUActionLogs {
         $this->baseadmindatas->init(array(
             'handle_database' => false,
             'can_edit' => true,
+            'id_type' => 'bigint unsigned',
             'plugin_id' => $this->plugin_settings['id'],
             'plugin_pageid' => $this->admin_page_id,
             'table_name' => $this->plugin_settings['id'],
@@ -1183,7 +1184,7 @@ class WPUActionLogs {
 
         // Remove HTML tags
         $string = str_replace('>', '> ', $string);
-        $string = strip_tags($string);
+        $string = wp_strip_all_tags($string);
         $string = preg_replace('/\s+/', ' ', $string);
 
         // Trim each line
@@ -1198,7 +1199,7 @@ class WPUActionLogs {
 
     public function text_truncate($string, $length = 150, $more = '...') {
         $_new_string = '';
-        $string = strip_tags($string);
+        $string = wp_strip_all_tags($string);
         $_maxlen = $length - strlen($more);
         $_words = explode(' ', $string);
 
