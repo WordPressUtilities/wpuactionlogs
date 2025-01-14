@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.32.0
+Version: 0.32.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.32.0';
+    private $plugin_version = '0.32.1';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -347,6 +347,9 @@ class WPUActionLogs {
         );
         require_once __DIR__ . '/inc/WPUBaseSettings/WPUBaseSettings.php';
         $this->settings_obj = new \wpuactionlogs\WPUBaseSettings($this->settings_details, $this->settings);
+        if (isset($_GET['page']) && $_GET['page'] == 'wpuactionlogs-settings') {
+            add_action('admin_init', array(&$this->settings_obj, 'load_assets'));
+        }
     }
 
     public function load_messages() {
@@ -411,17 +414,14 @@ class WPUActionLogs {
         }
 
         /* INTERFACES */
-        $q = "SELECT DISTINCT action_interface FROM {$wpdb->prefix}{$table} WHERE action_interface != '' ORDER BY action_interface ASC";
+        $q = "SELECT action_interface, COUNT(*) as count FROM {$wpdb->prefix}{$table} WHERE action_interface != '' GROUP BY action_interface ORDER BY action_interface ASC";
         $interfaces = $wpdb->get_results($q);
         $current_interface = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'action_interface' ? $_GET['filter_value'] : '';
         if ($interfaces && count($interfaces) > 1) {
-            $interfaces = array_map(function ($a) {
-                return $a->action_interface;
-            }, $interfaces);
             echo '<p><label for="wpuactionlogs_select_interface">' . __('Select an interface: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_interface" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=action_interface&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="action_interface" id="action_interface">';
             echo '<option value="">' . __('All values', 'wpuactionlogs') . '</option>';
             foreach ($interfaces as $interface) {
-                echo '<option ' . ($current_interface == $interface ? 'selected' : '') . ' value="' . $interface . '">' . esc_html($interface) . '</option>';
+                echo '<option ' . ($current_interface == $interface->action_interface ? 'selected' : '') . ' value="' . $interface->action_interface . '">' . esc_html($interface->action_interface . ' (' . number_format($interface->count) . ')') . '</option>';
             }
             echo '</select></p>';
         }
