@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_x\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminPage\n"
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseUpdate\n"
@@ -43,7 +43,7 @@ msgstr "Envoyer"
 #: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:792
 #, php-format
 msgid "Items %s - %s"
-msgstr "Articles %s - %s"
+msgstr "Lignes %s - %s"
 
 #: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:807
 #, php-format
