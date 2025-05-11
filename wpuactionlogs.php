@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.32.2
+Version: 0.32.3
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.32.2';
+    private $plugin_version = '0.32.3';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -338,6 +338,20 @@ class WPUActionLogs {
                 'type' => 'number',
                 'section' => 'extras'
             ),
+            'min_capability_log' => array(
+                'label' => __('Min capability', 'wpuactionlogs'),
+                'help' => __('Log only if user have this capability.', 'wpuactionlogs'),
+                'type' => 'select',
+                'section' => 'extras',
+                'datas' => array(
+                    'none' => 'none',
+                    'read' => 'read',
+                    'edit_posts' => 'edit_posts',
+                    'edit_others_posts' => 'edit_others_posts',
+                    'edit_users' => 'edit_users',
+                    'manage_options' => 'manage_options'
+                )
+            ),
             'ignored_options' => array(
                 'label' => __('Ignored options', 'wpuactionlogs'),
                 'help' => __('Options that will not be logged : one option_name per line', 'wpuactionlogs'),
@@ -627,6 +641,11 @@ class WPUActionLogs {
         }
         if (!isset($extra['user_id'])) {
             $extra['user_id'] = get_current_user_id();
+        }
+
+        $min_capability_log = $this->settings_obj->get_setting('min_capability_log');
+        if ($min_capability_log && $min_capability_log != 'none' && !current_user_can($min_capability_log)) {
+            return;
         }
 
         $this->baseadmindatas->create_line(array(
