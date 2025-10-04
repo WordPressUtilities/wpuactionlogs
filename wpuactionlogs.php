@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.32.3
+Version: 0.33.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.32.3';
+    private $plugin_version = '0.33.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -85,13 +85,18 @@ class WPUActionLogs {
         ));
 
         add_action('wp_dashboard_setup', function () {
-            if (!$this->can_view_active_users()) {
-                return;
+            if ($this->can_view_active_users()) {
+                wp_add_dashboard_widget(
+                    'wpuactionlogs_dashboard_widget',
+                    __('Currently online', 'wpuactionlogs'),
+                    array(&$this, 'dashboard_widget_content')
+                );
             }
+
             wp_add_dashboard_widget(
-                'wpuactionlogs_dashboard_widget',
-                __('Currently online', 'wpuactionlogs'),
-                array(&$this, 'dashboard_widget_content')
+                'wpuactionlogs_dashboard_widget_history',
+                __('Last edited posts', 'wpuactionlogs'),
+                array(&$this, 'dashboard_widget_history_content')
             );
         });
 
@@ -622,6 +627,57 @@ class WPUActionLogs {
             echo '<li> • ' . $user->display_name . '</li>';
         }
         echo '</ul>';
+    }
+
+    /* ----------------------------------------------------------
+      Dashboard Widget History
+    ---------------------------------------------------------- */
+
+    public function dashboard_widget_history_content() {
+
+        $error_edited_posts_str = __('No recently edited posts', 'wpuactionlogs');
+
+        $current_user_id = get_current_user_id();
+        if (!$current_user_id) {
+            return;
+        }
+        global $wpdb;
+        $table = $this->plugin_settings['id'];
+        $q = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$table} WHERE user_id = %d AND action_type IN ('save_post') ORDER BY creation DESC LIMIT 0,50", $current_user_id);
+        $user_lines = $wpdb->get_results($q);
+        if (!$user_lines) {
+            echo wpautop($error_edited_posts_str);
+            return;
+        }
+
+        $edited_posts = array();
+        foreach ($user_lines as $line) {
+            $data = json_decode($line->action_detail, 1);
+            if (!isset($data['post_id'], $data['post_type']) || !is_numeric($data['post_id']) || isset($edited_posts[$data['post_id']])) {
+                continue;
+            }
+            if (!in_array($data['post_type'], $this->excluded_post_types_ids) && (!isset($data['post_status']) || $data['post_status'] != 'auto-draft')) {
+                $edited_posts[$data['post_id']] = $line;
+            }
+            if (count($edited_posts) >= 5) {
+                break;
+            }
+        }
+
+        if(empty($edited_posts)) {
+            echo wpautop($error_edited_posts_str);
+            return;
+        }
+
+        echo '<ul>';
+        foreach ($edited_posts as $line) {
+            $data = json_decode($line->action_detail, 1);
+            $edit_link = get_edit_post_link($data['post_id']);
+            $post_title = isset($data['post_title']) ? $data['post_title'] : $data['post_id'];
+            echo '<li><a href="' . esc_url($edit_link) . '">' . esc_html($post_title) . '</a> - ' . esc_html(human_time_diff(strtotime($line->creation), time())) . ' ' . __('ago', 'wpuactionlogs') . '</li>';
+        }
+        echo '</ul>';
+
     }
 
     /* ----------------------------------------------------------
