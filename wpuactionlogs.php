@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.33.0
+Version: 0.33.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,7 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.33.0';
+    private $plugin_version = '0.33.1';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -95,7 +95,7 @@ class WPUActionLogs {
 
             wp_add_dashboard_widget(
                 'wpuactionlogs_dashboard_widget_history',
-                __('Last edited posts', 'wpuactionlogs'),
+                __('Last edited items', 'wpuactionlogs'),
                 array(&$this, 'dashboard_widget_history_content')
             );
         });
@@ -633,6 +633,45 @@ class WPUActionLogs {
       Dashboard Widget History
     ---------------------------------------------------------- */
 
+    public function get_recently_edited_items($user_id = 0, $limit = 5) {
+        if (!$user_id) {
+            return false;
+        }
+        $items_actions = array(
+            'save_post',
+            'edit_term',
+            'create_category',
+            'edit_category',
+            'create_term'
+        );
+
+        global $wpdb;
+        $table = $this->plugin_settings['id'];
+        $q = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$table} WHERE user_id = %d AND action_type IN ('" . implode("','", $items_actions) . "') ORDER BY creation DESC LIMIT 0,%d", $user_id, 100);
+        $user_lines = $wpdb->get_results($q);
+        if (!$user_lines) {
+            return false;
+        }
+
+        $edited_items = array();
+        foreach ($user_lines as $line) {
+            $data = json_decode($line->action_detail, 1);
+            if (isset($data['post_id'], $data['post_type']) && is_numeric($data['post_id']) && !isset($edited_items['post_' . $data['post_id']])) {
+                if (!in_array($data['post_type'], $this->excluded_post_types_ids) && (!isset($data['post_status']) || $data['post_status'] != 'auto-draft')) {
+                    $edited_items['post_' . $data['post_id']] = $line;
+                }
+            }
+            if (isset($data['term_id'], $data['taxonomy']) && is_numeric($data['term_id']) && !isset($edited_items['term_' . $data['term_id']]) && !in_array($data['taxonomy'], array('post_translations'))) {
+                $edited_items['term_' . $data['term_id']] = $line;
+            }
+            if (count($edited_items) >= $limit) {
+                break;
+            }
+        }
+
+        return $edited_items;
+    }
+
     public function dashboard_widget_history_content() {
 
         $error_edited_posts_str = __('No recently edited posts', 'wpuactionlogs');
@@ -641,40 +680,37 @@ class WPUActionLogs {
         if (!$current_user_id) {
             return;
         }
-        global $wpdb;
-        $table = $this->plugin_settings['id'];
-        $q = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}{$table} WHERE user_id = %d AND action_type IN ('save_post') ORDER BY creation DESC LIMIT 0,50", $current_user_id);
-        $user_lines = $wpdb->get_results($q);
-        if (!$user_lines) {
-            echo wpautop($error_edited_posts_str);
-            return;
-        }
 
-        $edited_posts = array();
-        foreach ($user_lines as $line) {
-            $data = json_decode($line->action_detail, 1);
-            if (!isset($data['post_id'], $data['post_type']) || !is_numeric($data['post_id']) || isset($edited_posts[$data['post_id']])) {
-                continue;
-            }
-            if (!in_array($data['post_type'], $this->excluded_post_types_ids) && (!isset($data['post_status']) || $data['post_status'] != 'auto-draft')) {
-                $edited_posts[$data['post_id']] = $line;
-            }
-            if (count($edited_posts) >= 5) {
-                break;
-            }
-        }
-
-        if(empty($edited_posts)) {
+        $edited_items = $this->get_recently_edited_items($current_user_id, 5);
+        if (!$edited_items) {
             echo wpautop($error_edited_posts_str);
             return;
         }
 
         echo '<ul>';
-        foreach ($edited_posts as $line) {
+        foreach ($edited_items as $line) {
             $data = json_decode($line->action_detail, 1);
-            $edit_link = get_edit_post_link($data['post_id']);
-            $post_title = isset($data['post_title']) ? $data['post_title'] : $data['post_id'];
-            echo '<li><a href="' . esc_url($edit_link) . '">' . esc_html($post_title) . '</a> - ' . esc_html(human_time_diff(strtotime($line->creation), time())) . ' ' . __('ago', 'wpuactionlogs') . '</li>';
+
+            $dashicon = 'dashicons-admin-post';
+            if (isset($data['post_id'])) {
+                $edit_link = get_edit_post_link($data['post_id']);
+                $edit_title = isset($data['post_title']) ? $data['post_title'] : $data['post_id'];
+            }
+            if(isset($data['term_id'], $data['taxonomy'])) {
+                $dashicon = 'dashicons-category';
+                $edit_link = get_edit_term_link($data['term_id'], $data['taxonomy']);
+                $term = get_term($data['term_id'], $data['taxonomy']);
+                $edit_title = $term && !is_wp_error($term) && $term->name ? $term->name : $data['term_id'];
+            }
+
+            if (!$edit_link || !$edit_title) {
+                continue;
+            }
+
+            $icon = '<span class="dashicons ' . esc_attr($dashicon) . '" style="vertical-align:middle;margin-right:0.2em;"></span>';
+
+            $string = sprintf(__('%s ago', 'wpuactionlogs'), human_time_diff(strtotime($line->creation), current_time('timestamp')));
+            echo '<li>' . $icon . '<a href="' . esc_url($edit_link) . '">' . esc_html($edit_title) . '</a> - ' . $string . '</li>';
         }
         echo '</ul>';
 
@@ -965,7 +1001,7 @@ class WPUActionLogs {
     }
 
     public function action__users($user_id, $userdata = array()) {
-        $settings = array();
+
         $current_action = current_action();
         if (!$this->settings_obj->get_setting('action__users') == '1') {
             return;
@@ -1005,8 +1041,6 @@ class WPUActionLogs {
     }
 
     public function action__plugins($plugin) {
-        $settings = array();
-        $current_action = current_action();
         if (!$this->settings_obj->get_setting('action__plugins') == '1') {
             return;
         }
