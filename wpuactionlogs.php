@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.33.2
+Version: 0.34.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -26,7 +26,8 @@ class WPUActionLogs {
     public $baseadmindatas;
     public $settings_details;
     public $settings;
-    private $plugin_version = '0.33.2';
+    public $logged_lines_hashes = array();
+    private $plugin_version = '0.34.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -356,6 +357,12 @@ class WPUActionLogs {
                     'edit_users' => 'edit_users',
                     'manage_options' => 'manage_options'
                 )
+            ),
+            'ignore_duplicate_lines' => array(
+                'label' => __('Ignore duplicate lines', 'wpuactionlogs'),
+                'help' => __('If the same log line is created multiple times in a row, only the first one will be logged', 'wpuactionlogs'),
+                'type' => 'checkbox',
+                'section' => 'extras'
             ),
             'ignored_options' => array(
                 'label' => __('Ignored options', 'wpuactionlogs'),
@@ -694,7 +701,7 @@ class WPUActionLogs {
                 $edit_link = get_edit_post_link($data['post_id']);
                 $edit_title = isset($data['post_title']) ? $data['post_title'] : $data['post_id'];
             }
-            if(isset($data['term_id'], $data['taxonomy'])) {
+            if (isset($data['term_id'], $data['taxonomy'])) {
                 $dashicon = 'dashicons-category';
                 $edit_link = get_edit_term_link($data['term_id'], $data['taxonomy']);
                 $term = get_term($data['term_id'], $data['taxonomy']);
@@ -738,13 +745,24 @@ class WPUActionLogs {
             return;
         }
 
-        $this->baseadmindatas->create_line(array(
+        $line = array(
             'user_id' => $extra['user_id'],
             'action_source' => json_encode($this->get_call_stack()),
             'action_interface' => php_sapi_name(),
             'action_type' => current_action(),
             'action_detail' => json_encode($args)
-        ));
+        );
+
+        $ignore_duplicate_lines = $this->settings_obj->get_setting('ignore_duplicate_lines');
+        if ($ignore_duplicate_lines) {
+            $line_hash = md5(serialize($line));
+            if (in_array($line_hash, $this->logged_lines_hashes)) {
+                return;
+            }
+            $this->logged_lines_hashes[] = $line_hash;
+        }
+
+        $this->baseadmindatas->create_line($line);
     }
 
     /* ----------------------------------------------------------
