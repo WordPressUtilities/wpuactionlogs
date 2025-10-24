@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.34.0
+Version: 0.34.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.34.0';
+    private $plugin_version = '0.34.1';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -594,27 +594,44 @@ class WPUActionLogs {
     }
 
     /* ----------------------------------------------------------
+      Hide some users
+    ---------------------------------------------------------- */
+
+    function get_hidden_users() {
+        return apply_filters('wpuactionlogs_hidden_users_ids', array());
+    }
+
+    function is_user_hidden($user_id) {
+        return in_array($user_id, $this->get_hidden_users());
+    }
+
+    /* ----------------------------------------------------------
       Active users
     ---------------------------------------------------------- */
 
     public function page_content__active_users() {
         $active_users = $this->get_active_users('pages');
-        if (!$active_users) {
+        $html_users = '';
+        if ($active_users) {
+            foreach ($active_users as $user_transient) {
+                $user_id = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $user_transient);
+                if ($this->is_user_hidden($user_id)) {
+                    continue;
+                }
+                $transient_key = str_replace('_transient_', '', $user_transient);
+                $user = get_user_by('id', $user_id);
+                $expires = (int) get_option('_transient_timeout_' . $transient_key, 0);
+                $time_diff = human_time_diff($expires - $this->transient_active_duration, time());
+                $html_users .= '<li>' . get_avatar($user_id, 16, '', '', array(
+                    'class' => 'wpuactionlogs-avatar'
+                )) . ' ' . $user->display_name . ' • ' . htmlentities(urldecode(get_transient($transient_key))) . ' - ' . sprintf(__('%s ago', 'wpuactionlogs'), $time_diff) . '</li>';
+            }
+        }
+        if ($html_users) {
+            echo '<ul>' . $html_users . '</ul>';
+        } else {
             echo '<p>' . __('No active users', 'wpuactionlogs') . '</p>';
-            return;
         }
-        echo '<ul>';
-        foreach ($active_users as $user_transient) {
-            $user_id = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $user_transient);
-            $transient_key = str_replace('_transient_', '', $user_transient);
-            $user = get_user_by('id', $user_id);
-            $expires = (int) get_option('_transient_timeout_' . $transient_key, 0);
-            $time_diff = human_time_diff($expires - $this->transient_active_duration, time());
-            echo '<li>' . get_avatar($user_id, 16, '', '', array(
-                'class' => 'wpuactionlogs-avatar'
-            )) . ' ' . $user->display_name . ' • ' . htmlentities(urldecode(get_transient($transient_key))) . ' - ' . sprintf(__('%s ago', 'wpuactionlogs'), $time_diff) . '</li>';
-        }
-        echo '</ul>';
     }
 
     /* ----------------------------------------------------------
@@ -1237,7 +1254,11 @@ class WPUActionLogs {
         $q = "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_{$this->plugin_settings['transient_action_prefix']}%'";
         $results = $wpdb->get_results($q);
         foreach ($results as $result) {
-            $users_with_transient[] = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $result->option_name);
+            $user_id = str_replace('_transient_' . $this->plugin_settings['transient_action_prefix'], '', $result->option_name);
+            if($this->is_user_hidden($user_id)) {
+                continue;
+            }
+            $users_with_transient[] = $user_id;
             $users_pages[] = $result->option_name;
         }
         if ($type == 'pages') {
@@ -1259,6 +1280,9 @@ class WPUActionLogs {
         $active_users = [];
         $current_page = $this->get_current_page();
         foreach ($users as $user) {
+            if($this->is_user_hidden($user->ID)) {
+                continue;
+            }
             $transient_key = $this->plugin_settings['transient_action_prefix'] . $user->ID;
             $last_page = get_transient($transient_key);
             if ($last_page == $current_page) {
