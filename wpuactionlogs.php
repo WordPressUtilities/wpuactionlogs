@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.35.1
+Version: 0.36.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.35.1';
+    private $plugin_version = '0.36.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -859,6 +859,12 @@ class WPUActionLogs {
 
         /* Users */
         $user_hooks = array(
+            'added_existing_user',
+            'add_user_to_blog',
+            'remove_user_from_blog',
+            'invited_user_email',
+            'after_signup_user',
+            'user_register',
             'wp_update_user',
             'wp_login_failed',
             'wp_logout',
@@ -1065,7 +1071,22 @@ class WPUActionLogs {
             ));
             return;
         }
+        if ($user_id && $current_action == 'after_signup_user') {
+            $this->log_line(array(
+                'username' => $user_id
+            ));
+            return;
+        }
         if ($userdata && !is_wp_error($userdata)) {
+            if (!is_array($userdata)) {
+                $userdata = (array) $userdata;
+            }
+            if (!isset($userdata['user_login'])) {
+                $user = get_user_by('id', $user_id);
+                if (is_object($user)) {
+                    $userdata['user_login'] = $user->user_login;
+                }
+            }
             $this->log_line(array(
                 'user_id' => $user_id,
                 'user_login' => $userdata['user_login']
