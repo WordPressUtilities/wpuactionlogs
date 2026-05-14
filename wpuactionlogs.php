@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.36.0
+Version: 0.37.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.36.0';
+    private $plugin_version = '0.37.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -384,7 +384,7 @@ class WPUActionLogs {
     }
 
     public function get_call_stack() {
-        $backtrace = debug_backtrace();
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
         $files = array();
         foreach ($backtrace as $trace) {
             if (!isset($trace['file'])) {
@@ -430,11 +430,11 @@ class WPUActionLogs {
                 $users_with_name[$usr->user_id] = $usr->display_name . ' (#' . $usr->user_id . ')';
             }
 
-            echo '<p><label for="wpuactionlogs_select_user">' . __('Select an user: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="user_id" id="user_id">';
-            echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . __('All values', 'wpuactionlogs') . '</option>';
-            echo '<option ' . ($current_user_empty ? 'selected' : '') . ' value="-">' . __('None', 'wpuactionlogs') . '</option>';
+            echo '<p><label for="wpuactionlogs_select_user">' . esc_html__('Select an user: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . esc_attr(esc_url(admin_url('admin.php?page=' . $this->admin_page_id))) . '" name="user_id" id="user_id">';
+            echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . esc_html__('All values', 'wpuactionlogs') . '</option>';
+            echo '<option ' . ($current_user_empty ? 'selected' : '') . ' value="-">' . esc_html__('None', 'wpuactionlogs') . '</option>';
             foreach ($users_with_name as $usr_id => $user_name) {
-                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . $usr_id . '">' . esc_html($user_name) . '</option>';
+                echo '<option ' . ($current_user == $usr_id ? 'selected' : '') . ' value="' . esc_attr($usr_id) . '">' . esc_html($user_name) . '</option>';
             }
             echo '</select></p>';
         }
@@ -444,10 +444,10 @@ class WPUActionLogs {
         $interfaces = $wpdb->get_results($q);
         $current_interface = isset($_GET['filter_key'], $_GET['filter_value']) && $_GET['filter_key'] == 'action_interface' ? $_GET['filter_value'] : '';
         if ($interfaces && count($interfaces) > 1) {
-            echo '<p><label for="wpuactionlogs_select_interface">' . __('Select an interface: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_interface" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=action_interface&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . admin_url('admin.php?page=' . $this->admin_page_id) . '" name="action_interface" id="action_interface">';
-            echo '<option value="">' . __('All values', 'wpuactionlogs') . '</option>';
+            echo '<p><label for="wpuactionlogs_select_interface">' . esc_html__('Select an interface: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_interface" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=action_interface&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . esc_attr(esc_url(admin_url('admin.php?page=' . $this->admin_page_id))) . '" name="action_interface" id="action_interface">';
+            echo '<option value="">' . esc_html__('All values', 'wpuactionlogs') . '</option>';
             foreach ($interfaces as $interface) {
-                echo '<option ' . ($current_interface == $interface->action_interface ? 'selected' : '') . ' value="' . $interface->action_interface . '">' . esc_html($interface->action_interface . ' (' . number_format($interface->count) . ')') . '</option>';
+                echo '<option ' . ($current_interface == $interface->action_interface ? 'selected' : '') . ' value="' . esc_attr($interface->action_interface) . '">' . esc_html($interface->action_interface . ' (' . number_format($interface->count) . ')') . '</option>';
             }
             echo '</select></p>';
         }
@@ -490,20 +490,20 @@ class WPUActionLogs {
             $cellcontent = '<a href="' . esc_url($filter_url) . '">' . esc_html($cellcontent) . '</a>';
         }
         if ($cell_id == 'action_source') {
-            $cellcontent_raw = json_decode($cellcontent, 1);
+            $cellcontent_raw = $this->json_decode($cellcontent);
             if ($cellcontent_raw) {
                 $cellcontent_raw = array_map(function ($a) {
                     $admin_url = admin_url('admin.php?page=' . $this->admin_page_id);
                     $filter_link = $admin_url . '&' . http_build_query(array(
                         'where_text' => str_replace('/', '\\/', $a)
                     ));
-                    return '<a href="' . esc_url($filter_link) . '">' . $a . '</a>';
+                    return '<a href="' . esc_url($filter_link) . '">' . esc_html($a) . '</a>';
                 }, $cellcontent_raw);
                 $cellcontent = implode('<br/>', $cellcontent_raw);
             }
         }
         if ($cell_id == 'action_detail') {
-            $data = json_decode($cellcontent, 1);
+            $data = $this->json_decode($cellcontent);
             if (is_array($data)) {
                 $cellcontent = '';
 
@@ -519,11 +519,11 @@ class WPUActionLogs {
                     get_post($data['post_id'])
                 ) {
                     $post_id = $data['post_id'];
-                    $data['post_id'] = '<a href="' . get_edit_post_link($data['post_id']) . '">' . $data['post_id'] . '</a>';
+                    $data['post_id'] = '<a href="' . get_edit_post_link($data['post_id']) . '">' . esc_html($data['post_id']) . '</a>';
                 }
 
                 if (isset($data['term_id'], $data['taxonomy']) && !in_array($data['taxonomy'], array('post_translations')) && is_numeric($data['term_id']) && get_term($data['term_id'])) {
-                    $data['term_id'] = '<a href="' . get_edit_term_link($data['term_id'], $data['taxonomy']) . '">' . $data['term_id'] . '</a>';
+                    $data['term_id'] = '<a href="' . get_edit_term_link($data['term_id'], $data['taxonomy']) . '">' . esc_html($data['term_id']) . '</a>';
                 }
 
                 /* Attachments */
@@ -547,7 +547,7 @@ class WPUActionLogs {
                     if (is_array($var_display)) {
                         $var_display = json_encode($var_display);
                     }
-                    $cellcontent .= '<li><strong>' . $key . ' : </strong><span>' . $var_display . '</span></li>';
+                    $cellcontent .= '<li><strong>' . esc_html($key) . ' : </strong><span>' . wp_strip_all_tags($var_display, '<a><br>') . '</span></li>';
                 }
                 $cellcontent .= '</ul>';
 
@@ -1042,7 +1042,7 @@ class WPUActionLogs {
     public function action__users($user_id, $userdata = array()) {
 
         $current_action = current_action();
-        if (!$this->settings_obj->get_setting('action__users') == '1') {
+        if ($this->settings_obj->get_setting('action__users') != '1') {
             return;
         }
         if ($user_id && $current_action == 'wp_login') {
@@ -1095,7 +1095,7 @@ class WPUActionLogs {
     }
 
     public function action__plugins($plugin) {
-        if (!$this->settings_obj->get_setting('action__plugins') == '1') {
+        if ($this->settings_obj->get_setting('action__plugins') != '1') {
             return;
         }
         $this->log_line(array(
@@ -1221,17 +1221,17 @@ class WPUActionLogs {
         $menu_id = 'wpuactionlogs-active-users';
         $args = [
             'id' => $menu_id,
-            'title' => __('Online here:', 'wpuactionlogs') . ' ' . $avatars_html
+            'title' => esc_html__('Online here:', 'wpuactionlogs') . ' ' . $avatars_html
         ];
         $wp_admin_bar->add_node($args);
         foreach ($active_users as $user) {
             $title_html = get_avatar($user['id'], 16, '', '', array(
                 'class' => 'wpuactionlogs-active-avatar'
             ));
-            $title_html .= $user['name'] . ($user['id'] == get_current_user_id() ? ' ' . __('(you)', 'wpuactionlogs') : '');
+            $title_html .= $user['name'] . ($user['id'] == get_current_user_id() ? ' ' . esc_html__('(you)', 'wpuactionlogs') : '');
             $wp_admin_bar->add_node([
                 'id' => $menu_id . '-' . $user['id'],
-                'title' => $title_html,
+                'title' => esc_html($title_html),
                 'parent' => $menu_id
             ]);
         }
@@ -1240,7 +1240,7 @@ class WPUActionLogs {
     public function get_current_page() {
 
         /* Retrieve URI */
-        $current_page = esc_url($_SERVER['REQUEST_URI']);
+        $current_page = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
 
         /* Exclude some args */
         $excluded_args = array(
@@ -1335,7 +1335,7 @@ class WPUActionLogs {
             $q = $wpdb->prepare("SELECT  * FROM {$wpdb->prefix}{$table} WHERE user_id = %d  ORDER BY creation DESC LIMIT 0,1", $user_id);
             $users = $wpdb->get_results($q);
             if ($users && count($users) > 0) {
-                $string = sprintf(__('%s ago', 'wpuactionlogs'), human_time_diff(strtotime($users[0]->creation), current_time('timestamp')));
+                $string = sprintf(__('%s ago', 'wpuactionlogs'), human_time_diff(wp_date('U', strtotime($users[0]->creation)), current_time('timestamp')));
                 return '<a href="' . admin_url('admin.php?page=wpuactionlogs-main&filter_key=user_id&filter_value=' . $user_id) . '">' . $string . '</a>';
             }
         }
@@ -1395,6 +1395,14 @@ class WPUActionLogs {
         }
 
         return $_new_string;
+    }
+
+    public function json_decode($string) {
+        if (strpos($string, '{&quot;') !== false || strpos($string, '[&quot;') !== false) {
+            $string = html_entity_decode($string);
+        }
+
+        return json_decode($string, true);
     }
 
 }
