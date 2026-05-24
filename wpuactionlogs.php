@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.38.0
+Version: 0.39.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.38.0';
+    private $plugin_version = '0.39.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -328,6 +328,12 @@ class WPUActionLogs {
                 'type' => 'checkbox',
                 'section' => 'actions'
             ),
+            'action__various' => array(
+                'label' => __('Various', 'wpuactionlogs'),
+                'label_check' => sprintf($action_string, __('Various', 'wpuactionlogs')),
+                'type' => 'checkbox',
+                'section' => 'actions'
+            ),
             'interface_web_disabled' => array(
                 'label' => __('Disable on web', 'wpuactionlogs'),
                 'label_check' => sprintf($interface_string, __('web interface', 'wpuactionlogs')),
@@ -600,7 +606,13 @@ class WPUActionLogs {
 
         $nb_days_options = array(3, 7, 14, 21, 30, 60, 90);
 
-        $periods = array();
+        $periods = array(
+            '24h' => array(
+                'label' => __('Last 24 hours', 'wpuactionlogs'),
+                'days' => 1,
+                'granularity' => 'hour'
+            )
+        );
         foreach ($nb_days_options as $nb_days) {
             $key = $nb_days . 'd';
             $periods[$key] = array(
@@ -879,9 +891,15 @@ class WPUActionLogs {
                 $user = get_user_by('id', $user_id);
                 $expires = (int) get_option('_transient_timeout_' . $transient_key, 0);
                 $time_diff = human_time_diff($expires - $this->transient_active_duration, time());
-                $html_users .= '<li>' . get_avatar($user_id, 16, '', '', array(
+                $html_users .= '<li>';
+                $html_users .= '<a href="' . esc_url(admin_url('admin.php?page=' . $this->admin_page_id . '&filter_key=user_id&filter_value=' . intval($user_id))) . '">';
+                $html_users .= get_avatar($user_id, 16, '', '', array(
                     'class' => 'wpuactionlogs-avatar'
-                )) . ' ' . esc_html($user->display_name) . ' • ' . esc_html(urldecode(get_transient($transient_key))) . ' - ' . sprintf(__('%s ago', 'wpuactionlogs'), $time_diff) . '</li>';
+                ));
+                $html_users .= ' ' . esc_html($user->display_name);
+                $html_users .= '</a>';
+                $html_users .= ' • ' . esc_html(urldecode(get_transient($transient_key))) . ' - ' . sprintf(__('%s ago', 'wpuactionlogs'), $time_diff);
+                $html_users .= '</li>';
             }
         }
         if ($html_users) {
@@ -1145,6 +1163,16 @@ class WPUActionLogs {
                 'action__plugins'
             ), 99, 1);
         }
+
+        /* Various hooks */
+        $various_hooks = array(
+            'redirection_redirect_updated'
+        );
+        foreach ($various_hooks as $various_hook) {
+            add_action($various_hook, array(&$this,
+                'action__various'
+            ), 99, 1);
+        }
     }
 
     public function action__posts($post_id) {
@@ -1360,6 +1388,14 @@ class WPUActionLogs {
         $this->log_line(array(
             'plugin' => $plugin
         ));
+    }
+
+    public function action__various($args) {
+        if ($this->settings_obj->get_setting('action__various') != '1') {
+            return;
+        }
+
+        $this->log_line($args);
     }
 
     /* ----------------------------------------------------------
