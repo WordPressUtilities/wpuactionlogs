@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.39.0
+Version: 0.40.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -449,7 +449,7 @@ class WPUActionLogs {
                 $users_with_name[$usr->user_id] = $usr->display_name . ' (#' . $usr->user_id . ')';
             }
 
-            echo '<p><label for="wpuactionlogs_select_user">' . esc_html__('Select an user: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . esc_attr(esc_url(admin_url('admin.php?page=' . $this->admin_page_id))) . '" name="user_id" id="user_id">';
+            echo '<p><label for="wpuactionlogs_select_user">' . esc_html__('Select a user: ', 'wpuactionlogs') . '</label><br /><select id="wpuactionlogs_select_user" onchange="window.location=this.value?this.getAttribute(\'data-base-url\')+\'&amp;filter_key=user_id&amp;filter_value=\'+(this.value==\'-\'?\'\':this.value):this.getAttribute(\'data-base-url\')" data-base-url="' . esc_attr(esc_url(admin_url('admin.php?page=' . $this->admin_page_id))) . '" name="user_id" id="user_id">';
             echo '<option ' . (!$current_user_empty && $current_user == '' ? 'selected' : '') . ' value="">' . esc_html__('All values', 'wpuactionlogs') . '</option>';
             echo '<option ' . ($current_user_empty ? 'selected' : '') . ' value="-">' . esc_html__('None', 'wpuactionlogs') . '</option>';
             foreach ($users_with_name as $usr_id => $user_name) {
@@ -599,7 +599,7 @@ class WPUActionLogs {
         $this->render_activity_selectors($periods, $current_period, $users, $has_system, $selected_user);
         $this->render_activity_chart('user', sprintf(__('Activity for %s', 'wpuactionlogs'), $user_label), $user_series, $unit_label);
         $this->render_activity_chart('global', __('Global activity', 'wpuactionlogs'), $global_series, $unit_label);
-        $this->render_activity_chart_js($buckets['display_labels'], $user_series, $global_series, $user_label);
+        $this->render_activity_chart_js($buckets['display_labels'], $user_series, $global_series, $user_label, $buckets['keys'], $period_cfg['granularity'], $selected_user);
     }
 
     private function activity_get_periods() {
@@ -756,21 +756,47 @@ class WPUActionLogs {
         echo '<div style="max-width:100%;' . $margin . '"><canvas id="wpuactionlogs-chart-' . esc_attr($id) . '" height="100"></canvas></div>';
     }
 
-    private function render_activity_chart_js($display_labels, $user_series, $global_series, $user_label) {
+    private function render_activity_chart_js($display_labels, $user_series, $global_series, $user_label, $bucket_keys, $granularity, $selected_user) {
+        $logs_url = admin_url('admin.php?page=' . $this->admin_page_id);
+
+        $where_values = array();
+        foreach ($bucket_keys as $k) {
+            /* Day mode: key is 'Y-m-d' → use as-is. Hour mode: key is 'Y-m-d H:00:00' → use 'Y-m-d H:' for LIKE match. */
+            $where_values[] = ($granularity === 'hour') ? substr($k, 0, 13) . ':' : $k;
+        }
+
+        $user_filter = '';
+        if ($selected_user === 'system') {
+            $user_filter = '&filter_key=user_id&filter_value=0';
+        } elseif (intval($selected_user) > 0) {
+            $user_filter = '&filter_key=user_id&filter_value=' . intval($selected_user);
+        }
+
         $payload = array(
             'labels' => array_values($display_labels),
             'global' => array_values($global_series),
             'user' => array_values($user_series),
             'global_label' => __('Actions', 'wpuactionlogs'),
-            'user_label' => sprintf(__('Actions (%s)', 'wpuactionlogs'), $user_label)
+            'user_label' => sprintf(__('Actions (%s)', 'wpuactionlogs'), $user_label),
+            'where_values' => $where_values,
+            'logs_url' => $logs_url,
+            'user_filter' => $user_filter
         );
 
         echo '<script>(function(){';
         echo 'var data = ' . wp_json_encode($payload) . ';';
         echo 'function init(){if(typeof Chart==="undefined"){return setTimeout(init,50);}';
+        echo 'function buildClick(series,extraFilter){return function(evt,els,chart){';
+        echo 'var el=els&&els[0]?els[0]:chart.getElementsAtEventForMode(evt,"nearest",{intersect:true},false)[0];';
+        echo 'if(!el)return;var i=el.index;if(!series[i])return;';
+        echo 'window.location=data.logs_url+"&where_text="+encodeURIComponent(data.where_values[i])+extraFilter;';
+        echo '};}';
+        echo 'function buildHover(series){return function(evt,els){';
+        echo 'var el=els&&els[0];evt.native.target.style.cursor=(el&&series[el.index])?"pointer":"default";';
+        echo '};}';
         echo 'var common={type:"bar",options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}};';
-        echo 'new Chart(document.getElementById("wpuactionlogs-chart-global"),Object.assign({},common,{data:{labels:data.labels,datasets:[{label:data.global_label,data:data.global,backgroundColor:"#2271b1"}]}}));';
-        echo 'new Chart(document.getElementById("wpuactionlogs-chart-user"),Object.assign({},common,{data:{labels:data.labels,datasets:[{label:data.user_label,data:data.user,backgroundColor:"#72aee6"}]}}));';
+        echo 'new Chart(document.getElementById("wpuactionlogs-chart-global"),{type:"bar",data:{labels:data.labels,datasets:[{label:data.global_label,data:data.global,backgroundColor:"#2271b1"}]},options:Object.assign({},common.options,{onClick:buildClick(data.global,""),onHover:buildHover(data.global)})});';
+        echo 'new Chart(document.getElementById("wpuactionlogs-chart-user"),{type:"bar",data:{labels:data.labels,datasets:[{label:data.user_label,data:data.user,backgroundColor:"#72aee6"}]},options:Object.assign({},common.options,{onClick:buildClick(data.user,data.user_filter),onHover:buildHover(data.user)})});';
         echo '}init();';
         echo '})();</script>';
     }
