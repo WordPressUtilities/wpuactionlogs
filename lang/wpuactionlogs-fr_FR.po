@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2026-05-25 21:47+0200\n"
+"POT-Creation-Date: 2026-06-04 22:30+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,80 +18,80 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminPage\n"
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseUpdate\n"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:638
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:893
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:647
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:902
 msgid "New Post"
 msgstr "Nouvel article"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:640
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:649
 msgid "Back"
 msgstr "Retour"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:667
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:676
 msgid "Select a post"
 msgstr "Sélectionner une publication"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:675
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:684
 #: inc/WPUBaseSettings/WPUBaseSettings.php:165
 msgid "No"
 msgstr "Non"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:676
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:685
 #: inc/WPUBaseSettings/WPUBaseSettings.php:165
 msgid "Yes"
 msgstr "Oui"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:691
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:700
 msgid "Submit"
 msgstr "Envoyer"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:853
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:862
 #, php-format
 msgid "Items %s - %s"
 msgstr "Lignes %s - %s"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:868
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:877
 #, php-format
 msgid "<strong>Filter :</strong> %s • <strong>Value :</strong> %s"
 msgstr "<strong>Filtre :</strong> %s • <strong>Valeur :</strong> %s"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:869
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:878
 msgid "Reset"
 msgstr "Réinitialiser"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:879
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:888
 msgid "Search"
 msgstr "Rechercher"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:881
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:890
 msgid "Clear"
 msgstr "Vider"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:941
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:950
 msgid "Show more details"
 msgstr "Afficher plus de détails"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:947
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:956
 msgid "Edit"
 msgstr "Modifier"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:947
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:956
 msgid "View"
 msgstr "Voir"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:955
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:964
 msgid "Delete"
 msgstr "Supprimer"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:957
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:966
 msgid "Delete filtered lines"
 msgstr "Supprimer les lignes filtrées"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:968
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:977
 msgid "Export all"
 msgstr "Tout exporter"
 
-#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:970
+#: inc/WPUBaseAdminDatas/WPUBaseAdminDatas.php:979
 msgid "Export filtered view"
 msgstr "Exporter la vue filtrée"
 
@@ -139,7 +139,7 @@ msgid "Useful logs about what’s happening on your website admin."
 msgstr ""
 "Des logs utiles sur ce qui se passe dans l’administration de votre site Web."
 
-#: wpuactionlogs.php:175 wpuactionlogs.php:273 wpuactionlogs.php:764
+#: wpuactionlogs.php:175 wpuactionlogs.php:273 wpuactionlogs.php:788
 msgid "Actions"
 msgstr "Actions"
 
@@ -330,82 +330,86 @@ msgstr "jour"
 msgid "Activity for %s"
 msgstr "Activité pour %s"
 
-#: wpuactionlogs.php:601
+#: wpuactionlogs.php:603
 msgid "Global activity"
 msgstr "Activité globale"
 
-#: wpuactionlogs.php:611
+#: wpuactionlogs.php:613
 msgid "Last 24 hours"
 msgstr "Dernières 24 heures"
 
-#: wpuactionlogs.php:619
+#: wpuactionlogs.php:621
 #, php-format
 msgid "Last %d days"
 msgstr "Derniers %d jours"
 
-#: wpuactionlogs.php:715 wpuactionlogs.php:738
+#: wpuactionlogs.php:717 wpuactionlogs.php:740
 msgid "System / unattributed"
 msgstr "Système / auteur inconnu"
 
-#: wpuactionlogs.php:725
+#: wpuactionlogs.php:727
 msgid "Period: "
 msgstr "Période : "
 
-#: wpuactionlogs.php:732
+#: wpuactionlogs.php:734
 msgid "User: "
 msgstr "Utilisateur : "
 
-#: wpuactionlogs.php:751
+#: wpuactionlogs.php:760
 #, php-format
 msgid "Total: %1$s actions • Average: %2$s / %3$s"
 msgstr "Total : %1$s actions • Moyenne : %2$s / %3$s"
 
-#: wpuactionlogs.php:765
+#: wpuactionlogs.php:764
+msgid "View all"
+msgstr "Voir tout"
+
+#: wpuactionlogs.php:789
 #, php-format
 msgid "Actions (%s)"
 msgstr "Actions (%s)"
 
-#: wpuactionlogs.php:833
+#: wpuactionlogs.php:868
 msgid "Save Changes"
 msgstr "Enregistrer les modifications"
 
-#: wpuactionlogs.php:842
+#: wpuactionlogs.php:877
 msgid "Purge old logs"
 msgstr "Purger les vieux journaux"
 
-#: wpuactionlogs.php:843
+#: wpuactionlogs.php:878
 msgid "Delete all logs"
 msgstr "Supprimer tous les journaux"
 
-#: wpuactionlogs.php:855
+#: wpuactionlogs.php:890
 msgid "All logs have been deleted"
 msgstr "Tous les journaux ont été supprimés"
 
-#: wpuactionlogs.php:860
+#: wpuactionlogs.php:895
 msgid "Old logs have been purged"
 msgstr "Les vieux journaux ont été purgés"
 
-#: wpuactionlogs.php:901 wpuactionlogs.php:1011 wpuactionlogs.php:1633
+#: wpuactionlogs.php:936 wpuactionlogs.php:1046 wpuactionlogs.php:1668
 #, php-format
 msgid "%s ago"
 msgstr "Il y a %s"
 
-#: wpuactionlogs.php:908 wpuactionlogs.php:919
+#: wpuactionlogs.php:943 wpuactionlogs.php:954
 msgid "No active users"
 msgstr "Aucun utilisateur actif"
 
-#: wpuactionlogs.php:974
+#: wpuactionlogs.php:1009
 msgid "No recently edited posts"
 msgstr "Aucune publication récemment modifiée"
 
-#: wpuactionlogs.php:1519
+#: wpuactionlogs.php:1554
 msgid "Online here:"
 msgstr "En ligne ici :"
 
-#: wpuactionlogs.php:1526
+#: wpuactionlogs.php:1561
 msgid "(you)"
 msgstr "(vous)"
 
-#: wpuactionlogs.php:1621
+#: wpuactionlogs.php:1656
 msgid "Last action"
 msgstr "Dernière action"

@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.40.0
+Version: 0.40.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.39.0';
+    private $plugin_version = '0.40.1';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -581,7 +581,7 @@ class WPUActionLogs {
 
     public function page_content__activity() {
         $periods = $this->activity_get_periods();
-        $current_period = isset($_GET['period'], $periods[$_GET['period']]) ? $_GET['period'] : '30d';
+        $current_period = isset($_GET['period'], $periods[$_GET['period']]) ? $_GET['period'] : '3d';
         $period_cfg = $periods[$current_period];
 
         $buckets = $this->build_activity_buckets($period_cfg);
@@ -597,7 +597,9 @@ class WPUActionLogs {
         $unit_label = $period_cfg['granularity'] === 'hour' ? __('hour', 'wpuactionlogs') : __('day', 'wpuactionlogs');
 
         $this->render_activity_selectors($periods, $current_period, $users, $has_system, $selected_user);
-        $this->render_activity_chart('user', sprintf(__('Activity for %s', 'wpuactionlogs'), $user_label), $user_series, $unit_label);
+        $this->render_activity_chart('user', sprintf(__('Activity for %s', 'wpuactionlogs'), $user_label), $user_series, $unit_label, array(
+            'user_id' => $selected_user
+        ));
         $this->render_activity_chart('global', __('Global activity', 'wpuactionlogs'), $global_series, $unit_label);
         $this->render_activity_chart_js($buckets['display_labels'], $user_series, $global_series, $user_label, $buckets['keys'], $period_cfg['granularity'], $selected_user);
     }
@@ -741,10 +743,17 @@ class WPUActionLogs {
         echo '</form>';
     }
 
-    private function render_activity_chart($id, $title, $series, $unit_label) {
+    private function render_activity_chart($id, $title, $series, $unit_label, $args = array()) {
+        $args = wp_parse_args($args, array(
+            'user_id' => ''
+        ));
         $total = array_sum($series);
         $avg = count($series) ? round($total / count($series), 1) : 0;
         $margin = $id === 'user' ? 'margin-bottom:2em;' : '';
+        $view_all_url = admin_url('admin.php?page=' . $this->admin_page_id);
+        if (is_numeric($args['user_id'])) {
+            $view_all_url .= '&filter_key=user_id&filter_value=' . intval($args['user_id']);
+        }
 
         echo '<h2>' . esc_html($title) . '</h2>';
         echo '<p>' . sprintf(
@@ -752,7 +761,7 @@ class WPUActionLogs {
             '<strong>' . esc_html(number_format_i18n($total)) . '</strong>',
             '<strong>' . esc_html(number_format_i18n($avg, 1)) . '</strong>',
             esc_html($unit_label)
-        ) . '</p>';
+        ) . ' - <a href="' . esc_url($view_all_url) . '">' . esc_html__('View all', 'wpuactionlogs') . '</a></p>';
         echo '<div style="max-width:100%;' . $margin . '"><canvas id="wpuactionlogs-chart-' . esc_attr($id) . '" height="100"></canvas></div>';
     }
 
