@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.40.1
+Version: 0.41.0
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.40.1';
+    private $plugin_version = '0.41.0';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
@@ -587,21 +587,28 @@ class WPUActionLogs {
         $buckets = $this->build_activity_buckets($period_cfg);
         $hidden_sql = $this->activity_hidden_users_sql();
 
-        $selected_user = isset($_GET['user_id']) ? sanitize_text_field($_GET['user_id']) : (string) get_current_user_id();
+        /* Empty = all users (default): the per-user chart is hidden */
+        $selected_user = isset($_GET['user_id']) ? sanitize_text_field($_GET['user_id']) : '';
+        $show_user = $selected_user !== '';
         list($users, $has_system) = $this->activity_get_users_for_dropdown($buckets, $hidden_sql, $selected_user);
 
-        $global_series = $this->activity_get_series('global', $buckets, $hidden_sql, $selected_user);
-        $user_series = $this->activity_get_series('user', $buckets, $hidden_sql, $selected_user);
+        $types = $this->activity_get_types_for_dropdown($buckets);
+        $selected_type = isset($_GET['action_type']) ? sanitize_text_field($_GET['action_type']) : '';
 
-        $user_label = $this->activity_user_label($selected_user);
+        $global_series = $this->activity_get_series('global', $buckets, $hidden_sql, $selected_user, $selected_type);
+        $user_series = $show_user ? $this->activity_get_series('user', $buckets, $hidden_sql, $selected_user, $selected_type) : array();
+
+        $user_label = $show_user ? $this->activity_user_label($selected_user) : '';
         $unit_label = $period_cfg['granularity'] === 'hour' ? __('hour', 'wpuactionlogs') : __('day', 'wpuactionlogs');
 
-        $this->render_activity_selectors($periods, $current_period, $users, $has_system, $selected_user);
-        $this->render_activity_chart('user', sprintf(__('Activity for %s', 'wpuactionlogs'), $user_label), $user_series, $unit_label, array(
-            'user_id' => $selected_user
-        ));
+        $this->render_activity_selectors($periods, $current_period, $users, $has_system, $selected_user, $types, $selected_type);
+        if ($show_user) {
+            $this->render_activity_chart('user', sprintf(__('Activity for %s', 'wpuactionlogs'), $user_label), $user_series, $unit_label, array(
+                'user_id' => $selected_user
+            ));
+        }
         $this->render_activity_chart('global', __('Global activity', 'wpuactionlogs'), $global_series, $unit_label);
-        $this->render_activity_chart_js($buckets['display_labels'], $user_series, $global_series, $user_label, $buckets['keys'], $period_cfg['granularity'], $selected_user);
+        $this->render_activity_chart_js($buckets['display_labels'], $user_series, $global_series, $user_label, $buckets['keys'], $period_cfg['granularity'], $selected_user, $show_user);
     }
 
     private function activity_get_periods() {
@@ -677,34 +684,52 @@ class WPUActionLogs {
         return array($users, $has_system);
     }
 
-    private function activity_get_series($scope, $buckets, $hidden_sql, $selected_user) {
+    private function activity_get_types_for_dropdown($buckets) {
         global $wpdb;
         $table = $wpdb->prefix . $this->plugin_settings['id'];
+
+        $sql = $wpdb->prepare(
+            "SELECT DISTINCT action_type FROM {$table} WHERE creation >= %s AND action_type != '' ORDER BY action_type ASC",
+            $buckets['from_mysql']
+        );
+        return $wpdb->get_col($sql);
+    }
+
+    private function activity_get_series($scope, $buckets, $hidden_sql, $selected_user, $selected_type = '') {
+        global $wpdb;
+        $table = $wpdb->prefix . $this->plugin_settings['id'];
+
+        /* Optional action_type filter, appended as a prepared fragment */
+        $type_sql = '';
+        $type_args = array();
+        if ($selected_type !== '') {
+            $type_sql = ' AND action_type = %s';
+            $type_args[] = $selected_type;
+        }
 
         if ($scope === 'global') {
             $sql = $wpdb->prepare(
                 "SELECT {$buckets['select_expr']} AS bucket, COUNT(*) AS c
                  FROM {$table}
-                 WHERE creation >= %s AND user_id != '' AND user_id != 0 {$hidden_sql}
+                 WHERE creation >= %s AND user_id != '' AND user_id != 0 {$hidden_sql}{$type_sql}
                  GROUP BY bucket",
-                $buckets['from_mysql']
+                array_merge(array($buckets['from_mysql']), $type_args)
             );
         } elseif ($selected_user === 'system') {
             $sql = $wpdb->prepare(
                 "SELECT {$buckets['select_expr']} AS bucket, COUNT(*) AS c
                  FROM {$table}
-                 WHERE creation >= %s AND (user_id = '' OR user_id = 0)
+                 WHERE creation >= %s AND (user_id = '' OR user_id = 0){$type_sql}
                  GROUP BY bucket",
-                $buckets['from_mysql']
+                array_merge(array($buckets['from_mysql']), $type_args)
             );
         } else {
             $sql = $wpdb->prepare(
                 "SELECT {$buckets['select_expr']} AS bucket, COUNT(*) AS c
                  FROM {$table}
-                 WHERE creation >= %s AND user_id = %d
+                 WHERE creation >= %s AND user_id = %d{$type_sql}
                  GROUP BY bucket",
-                $buckets['from_mysql'],
-                intval($selected_user)
+                array_merge(array($buckets['from_mysql'], intval($selected_user)), $type_args)
             );
         }
 
@@ -720,7 +745,7 @@ class WPUActionLogs {
         return $u ? $u->display_name : ('#' . intval($selected_user));
     }
 
-    private function render_activity_selectors($periods, $current_period, $users, $has_system, $selected_user) {
+    private function render_activity_selectors($periods, $current_period, $users, $has_system, $selected_user, $types = array(), $selected_type = '') {
         echo '<form method="get" action="' . esc_url(admin_url('admin.php')) . '" style="margin:1em 0;">';
         echo '<input type="hidden" name="page" value="wpuactionlogs-activity" />';
 
@@ -733,6 +758,7 @@ class WPUActionLogs {
 
         echo '<p><label for="wpuactionlogs_activity_user">' . esc_html__('User: ', 'wpuactionlogs') . '</label> ';
         echo '<select id="wpuactionlogs_activity_user" name="user_id" onchange="this.form.submit()">';
+        echo '<option ' . selected($selected_user, '', false) . ' value="">' . esc_html__('All users', 'wpuactionlogs') . '</option>';
         foreach ($users as $u) {
             echo '<option ' . selected($selected_user, (string) $u->ID, false) . ' value="' . esc_attr($u->ID) . '">' . esc_html($u->display_name . ' (#' . $u->ID . ')') . '</option>';
         }
@@ -740,6 +766,16 @@ class WPUActionLogs {
             echo '<option ' . selected($selected_user, 'system', false) . ' value="system">' . esc_html__('System / unattributed', 'wpuactionlogs') . '</option>';
         }
         echo '</select></p>';
+
+        if ($types) {
+            echo '<p><label for="wpuactionlogs_activity_type">' . esc_html__('Action type: ', 'wpuactionlogs') . '</label> ';
+            echo '<select id="wpuactionlogs_activity_type" name="action_type" onchange="this.form.submit()">';
+            echo '<option ' . selected($selected_type, '', false) . ' value="">' . esc_html__('All types', 'wpuactionlogs') . '</option>';
+            foreach ($types as $type) {
+                echo '<option ' . selected($selected_type, $type, false) . ' value="' . esc_attr($type) . '">' . esc_html($type) . '</option>';
+            }
+            echo '</select></p>';
+        }
         echo '</form>';
     }
 
@@ -765,7 +801,7 @@ class WPUActionLogs {
         echo '<div style="max-width:100%;' . $margin . '"><canvas id="wpuactionlogs-chart-' . esc_attr($id) . '" height="100"></canvas></div>';
     }
 
-    private function render_activity_chart_js($display_labels, $user_series, $global_series, $user_label, $bucket_keys, $granularity, $selected_user) {
+    private function render_activity_chart_js($display_labels, $user_series, $global_series, $user_label, $bucket_keys, $granularity, $selected_user, $show_user = true) {
         $logs_url = admin_url('admin.php?page=' . $this->admin_page_id);
 
         $where_values = array();
@@ -805,7 +841,9 @@ class WPUActionLogs {
         echo '};}';
         echo 'var common={type:"bar",options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}};';
         echo 'new Chart(document.getElementById("wpuactionlogs-chart-global"),{type:"bar",data:{labels:data.labels,datasets:[{label:data.global_label,data:data.global,backgroundColor:"#2271b1"}]},options:Object.assign({},common.options,{onClick:buildClick(data.global,""),onHover:buildHover(data.global)})});';
-        echo 'new Chart(document.getElementById("wpuactionlogs-chart-user"),{type:"bar",data:{labels:data.labels,datasets:[{label:data.user_label,data:data.user,backgroundColor:"#72aee6"}]},options:Object.assign({},common.options,{onClick:buildClick(data.user,data.user_filter),onHover:buildHover(data.user)})});';
+        if ($show_user) {
+            echo 'new Chart(document.getElementById("wpuactionlogs-chart-user"),{type:"bar",data:{labels:data.labels,datasets:[{label:data.user_label,data:data.user,backgroundColor:"#72aee6"}]},options:Object.assign({},common.options,{onClick:buildClick(data.user,data.user_filter),onHover:buildHover(data.user)})});';
+        }
         echo '}init();';
         echo '})();</script>';
     }

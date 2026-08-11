@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Action Logs\n"
-"POT-Creation-Date: 2026-06-04 22:30+0200\n"
+"POT-Creation-Date: 2026-08-11 22:33+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -139,7 +139,7 @@ msgid "Useful logs about what’s happening on your website admin."
 msgstr ""
 "Des logs utiles sur ce qui se passe dans l’administration de votre site Web."
 
-#: wpuactionlogs.php:175 wpuactionlogs.php:273 wpuactionlogs.php:788
+#: wpuactionlogs.php:175 wpuactionlogs.php:273 wpuactionlogs.php:824
 msgid "Actions"
 msgstr "Actions"
 
@@ -317,99 +317,111 @@ msgstr "Date"
 msgid "Account"
 msgstr "Compte"
 
-#: wpuactionlogs.php:597
+#: wpuactionlogs.php:602
 msgid "hour"
 msgstr "heure"
 
-#: wpuactionlogs.php:597
+#: wpuactionlogs.php:602
 msgid "day"
 msgstr "jour"
 
-#: wpuactionlogs.php:600
+#: wpuactionlogs.php:606
 #, php-format
 msgid "Activity for %s"
 msgstr "Activité pour %s"
 
-#: wpuactionlogs.php:603
+#: wpuactionlogs.php:610
 msgid "Global activity"
 msgstr "Activité globale"
 
-#: wpuactionlogs.php:613
+#: wpuactionlogs.php:620
 msgid "Last 24 hours"
 msgstr "Dernières 24 heures"
 
-#: wpuactionlogs.php:621
+#: wpuactionlogs.php:628
 #, php-format
 msgid "Last %d days"
 msgstr "Derniers %d jours"
 
-#: wpuactionlogs.php:717 wpuactionlogs.php:740
+#: wpuactionlogs.php:742 wpuactionlogs.php:766
 msgid "System / unattributed"
 msgstr "Système / auteur inconnu"
 
-#: wpuactionlogs.php:727
+#: wpuactionlogs.php:752
 msgid "Period: "
 msgstr "Période : "
 
-#: wpuactionlogs.php:734
+#: wpuactionlogs.php:759
 msgid "User: "
 msgstr "Utilisateur : "
 
-#: wpuactionlogs.php:760
+#: wpuactionlogs.php:761
+msgid "All users"
+msgstr "Tous les utilisateurs"
+
+#: wpuactionlogs.php:771
+msgid "Action type: "
+msgstr "Type d'action : "
+
+#: wpuactionlogs.php:773
+msgid "All types"
+msgstr "Tous les types"
+
+#: wpuactionlogs.php:796
 #, php-format
 msgid "Total: %1$s actions • Average: %2$s / %3$s"
 msgstr "Total : %1$s actions • Moyenne : %2$s / %3$s"
 
-#: wpuactionlogs.php:764
+#: wpuactionlogs.php:800
 msgid "View all"
 msgstr "Voir tout"
 
-#: wpuactionlogs.php:789
+#: wpuactionlogs.php:825
 #, php-format
 msgid "Actions (%s)"
 msgstr "Actions (%s)"
 
-#: wpuactionlogs.php:868
+#: wpuactionlogs.php:906
 msgid "Save Changes"
 msgstr "Enregistrer les modifications"
 
-#: wpuactionlogs.php:877
+#: wpuactionlogs.php:915
 msgid "Purge old logs"
 msgstr "Purger les vieux journaux"
 
-#: wpuactionlogs.php:878
+#: wpuactionlogs.php:916
 msgid "Delete all logs"
 msgstr "Supprimer tous les journaux"
 
-#: wpuactionlogs.php:890
+#: wpuactionlogs.php:928
 msgid "All logs have been deleted"
 msgstr "Tous les journaux ont été supprimés"
 
-#: wpuactionlogs.php:895
+#: wpuactionlogs.php:933
 msgid "Old logs have been purged"
 msgstr "Les vieux journaux ont été purgés"
 
-#: wpuactionlogs.php:936 wpuactionlogs.php:1046 wpuactionlogs.php:1668
+#: wpuactionlogs.php:974 wpuactionlogs.php:1084 wpuactionlogs.php:1706
 #, php-format
 msgid "%s ago"
 msgstr "Il y a %s"
 
-#: wpuactionlogs.php:943 wpuactionlogs.php:954
+#: wpuactionlogs.php:981 wpuactionlogs.php:992
 msgid "No active users"
 msgstr "Aucun utilisateur actif"
 
-#: wpuactionlogs.php:1009
+#: wpuactionlogs.php:1047
 msgid "No recently edited posts"
 msgstr "Aucune publication récemment modifiée"
 
-#: wpuactionlogs.php:1554
+#: wpuactionlogs.php:1592
 msgid "Online here:"
 msgstr "En ligne ici :"
 
-#: wpuactionlogs.php:1561
+#: wpuactionlogs.php:1599
 msgid "(you)"
 msgstr "(vous)"
 
-#: wpuactionlogs.php:1656
+#: wpuactionlogs.php:1694
 msgid "Last action"
 msgstr "Dernière action"
