@@ -5,7 +5,7 @@ Plugin Name: WPU Action Logs
 Plugin URI: https://github.com/WordPressUtilities/wpuactionlogs
 Update URI: https://github.com/WordPressUtilities/wpuactionlogs
 Description: Useful logs about what’s happening on your website admin.
-Version: 0.41.0
+Version: 0.41.1
 Author: Darklg
 Author URI: https://darklg.me/
 Text Domain: wpuactionlogs
@@ -27,7 +27,7 @@ class WPUActionLogs {
     public $settings_details;
     public $settings;
     public $logged_lines_hashes = array();
-    private $plugin_version = '0.41.0';
+    private $plugin_version = '0.41.1';
     private $transient_active_duration = 60;
     private $plugin_settings = array(
         'id' => 'wpuactionlogs',
